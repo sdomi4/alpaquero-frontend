@@ -1,5 +1,5 @@
-import { PUBLIC_API_BASE } from '$env/static/public';
-import type { PageLoad } from './$types';
+import { API_BASE } from '$env/static/private';
+import type { PageServerLoad } from './$types';
 
 export type ConfiguredDevice = {
 	type: string;
@@ -7,10 +7,15 @@ export type ConfiguredDevice = {
 	name: string;
 };
 
-export const load: PageLoad = async ({ fetch }) => {
+function backendUrl(path: string) {
+	const base = API_BASE.endsWith('/') ? API_BASE : `${API_BASE}/`;
+	return new URL(path.replace(/^\/+/, ''), base).toString();
+}
+
+export const load: PageServerLoad = async ({ fetch }) => {
 	const [devicesRes, sequencesRes] = await Promise.all([
-		fetch(`${PUBLIC_API_BASE}/observatory/devices`),
-		fetch(`${PUBLIC_API_BASE}/observatory/sequences`)
+		fetch(backendUrl('observatory/devices')),
+		fetch(backendUrl('observatory/sequences'))
 	]);
 
 	return {

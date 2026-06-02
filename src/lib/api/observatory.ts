@@ -1,4 +1,4 @@
-import { PUBLIC_API_BASE } from '$env/static/public';
+const OBSERVATORY_API_BASE = '/api/observatory';
 
 const DEVICE_ENDPOINTS: Record<string, string> = {
 	dome: 'dome',
@@ -23,7 +23,7 @@ export async function runDeviceLifecycleAction(
 	}
 
 	const res = await fetch(
-		`${PUBLIC_API_BASE}/${endpoint}/${encodeURIComponent(deviceId)}/${action}`,
+		`${OBSERVATORY_API_BASE}/${endpoint}/${encodeURIComponent(deviceId)}/${action}`,
 		{
 			method: 'POST'
 		}
@@ -38,7 +38,7 @@ export async function runDeviceLifecycleAction(
 
 export async function moveFilterWheel(filterwheelId: string, position: number) {
 	const res = await fetch(
-		`${PUBLIC_API_BASE}/filterwheel/${encodeURIComponent(filterwheelId)}/move/${position}`,
+		`${OBSERVATORY_API_BASE}/filterwheel/${encodeURIComponent(filterwheelId)}/move/${position}`,
 		{
 			method: 'POST'
 		}
@@ -53,7 +53,7 @@ export async function moveFilterWheel(filterwheelId: string, position: number) {
 
 export async function runSequence(sequenceName: string) {
 	const res = await fetch(
-		`${PUBLIC_API_BASE}/observatory/sequences/${encodeURIComponent(sequenceName)}/run`,
+		`${OBSERVATORY_API_BASE}/observatory/sequences/${encodeURIComponent(sequenceName)}/run`,
 		{
 			method: 'POST',
 			headers: {
@@ -72,7 +72,7 @@ export async function runSequence(sequenceName: string) {
 
 export async function pauseSequence(contextId: string) {
 	const res = await fetch(
-		`${PUBLIC_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/pause`,
+		`${OBSERVATORY_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/pause`,
 		{
 			method: 'POST'
 		}
@@ -87,7 +87,7 @@ export async function pauseSequence(contextId: string) {
 
 export async function resumeSequence(contextId: string) {
 	const res = await fetch(
-		`${PUBLIC_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/resume`,
+		`${OBSERVATORY_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/resume`,
 		{
 			method: 'POST'
 		}
@@ -102,7 +102,7 @@ export async function resumeSequence(contextId: string) {
 
 export async function abortSequence(contextId: string) {
 	const res = await fetch(
-		`${PUBLIC_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/abort`,
+		`${OBSERVATORY_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/abort`,
 		{
 			method: 'POST'
 		}
@@ -119,7 +119,7 @@ export async function uploadSequence(file: File, dryRun = false) {
 	const form = new FormData();
 	form.append('file', file);
 
-	const res = await fetch(`${PUBLIC_API_BASE}/observatory/sequences/parse?dry_run=${dryRun}`, {
+	const res = await fetch(`${OBSERVATORY_API_BASE}/observatory/sequences/parse?dry_run=${dryRun}`, {
 		method: 'POST',
 		body: form
 	});
@@ -132,7 +132,7 @@ export async function uploadSequence(file: File, dryRun = false) {
 }
 
 export async function listSequences() {
-	const res = await fetch(`${PUBLIC_API_BASE}/observatory/sequences`);
+	const res = await fetch(`${OBSERVATORY_API_BASE}/observatory/sequences`);
 
 	if (!res.ok) {
 		throw new Error(`Sequence list failed: ${res.status} ${res.statusText}`);
@@ -148,7 +148,7 @@ export async function openDome(domeId: string, safetyOverride = false) {
 		headers['x-safety-override'] = 'true';
 	}
 
-	const res = await fetch(`${PUBLIC_API_BASE}/dome/${encodeURIComponent(domeId)}/open`, {
+	const res = await fetch(`${OBSERVATORY_API_BASE}/dome/${encodeURIComponent(domeId)}/open`, {
 		method: 'POST',
 		headers
 	});
@@ -167,7 +167,7 @@ export async function closeDome(domeId: string, safetyOverride = false) {
 		headers['x-safety-override'] = 'true';
 	}
 
-	const res = await fetch(`${PUBLIC_API_BASE}/dome/${encodeURIComponent(domeId)}/close`, {
+	const res = await fetch(`${OBSERVATORY_API_BASE}/dome/${encodeURIComponent(domeId)}/close`, {
 		method: 'POST',
 		headers
 	});
@@ -186,7 +186,7 @@ export async function openCover(coverId: string, safetyOverride = false) {
 		headers['x-safety-override'] = 'true';
 	}
 
-	const res = await fetch(`${PUBLIC_API_BASE}/cover/${encodeURIComponent(coverId)}/open`, {
+	const res = await fetch(`${OBSERVATORY_API_BASE}/cover/${encodeURIComponent(coverId)}/open`, {
 		method: 'POST',
 		headers
 	});
@@ -205,7 +205,7 @@ export async function closeCover(coverId: string, safetyOverride = false) {
 		headers['x-safety-override'] = 'true';
 	}
 
-	const res = await fetch(`${PUBLIC_API_BASE}/cover/${encodeURIComponent(coverId)}/close`, {
+	const res = await fetch(`${OBSERVATORY_API_BASE}/cover/${encodeURIComponent(coverId)}/close`, {
 		method: 'POST',
 		headers
 	});
@@ -219,7 +219,7 @@ export async function closeCover(coverId: string, safetyOverride = false) {
 
 export async function turnCalibratorOn(coverId: string, brightness: number) {
 	const res = await fetch(
-		`${PUBLIC_API_BASE}/cover/${encodeURIComponent(coverId)}/calibrator/on/${brightness}`,
+		`${OBSERVATORY_API_BASE}/cover/${encodeURIComponent(coverId)}/calibrator/on/${brightness}`,
 		{
 			method: 'POST'
 		}
@@ -233,9 +233,12 @@ export async function turnCalibratorOn(coverId: string, brightness: number) {
 }
 
 export async function turnCalibratorOff(coverId: string) {
-	const res = await fetch(`${PUBLIC_API_BASE}/cover/${encodeURIComponent(coverId)}/calibrator/off`, {
-		method: 'POST'
-	});
+	const res = await fetch(
+		`${OBSERVATORY_API_BASE}/cover/${encodeURIComponent(coverId)}/calibrator/off`,
+		{
+			method: 'POST'
+		}
+	);
 
 	if (!res.ok) {
 		throw new Error(`Calibrator off failed: ${res.status} ${res.statusText}`);
@@ -253,7 +256,9 @@ export type SwitchControl = {
 };
 
 export async function getSwitchControls(switchId: string) {
-	const res = await fetch(`${PUBLIC_API_BASE}/switch/${encodeURIComponent(switchId)}/controls`);
+	const res = await fetch(
+		`${OBSERVATORY_API_BASE}/switch/${encodeURIComponent(switchId)}/controls`
+	);
 
 	if (!res.ok) {
 		throw new Error(`Switch controls failed: ${res.status} ${res.statusText}`);
@@ -264,7 +269,7 @@ export async function getSwitchControls(switchId: string) {
 
 export async function setSwitchControl(switchId: string, switchNumber: number, setting: number) {
 	const res = await fetch(
-		`${PUBLIC_API_BASE}/switch/${encodeURIComponent(switchId)}/${switchNumber}/${setting}`,
+		`${OBSERVATORY_API_BASE}/switch/${encodeURIComponent(switchId)}/${switchNumber}/${setting}`,
 		{
 			method: 'POST'
 		}
