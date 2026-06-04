@@ -2,6 +2,8 @@
  * @typedef {{ id: string; name: string; path: string }} CameraFeed
  */
 
+const WEBRTC_PORT = '8889';
+
 /**
  * @param {string} value
  */
@@ -16,42 +18,44 @@ function slugify(value) {
 }
 
 /**
- * Parse PUBLIC_WEBRTC_FEEDS-style values:
- * "All Sky|/webrtc/allsky,Dome|/webrtc/dome".
- *
- * @param {string | undefined | null} config
- * @returns {CameraFeed[]}
- */
-export function parseWebrtcFeedConfig(config) {
-	if (!config) return [];
-
-	return config
-		.split(',')
-		.map((entry) => {
-			const [rawName, ...pathParts] = entry.split('|');
-			const name = rawName?.trim();
-			const path = pathParts.join('|').trim();
-
-			if (!name || !path) return null;
-
-			return {
-				id: slugify(name),
-				name,
-				path
-			};
-		})
-		.filter((feed) => feed !== null);
-}
-
-/**
  * @param {string} path
  * @param {string} currentHref
  */
-export function buildSameHostFeedUrl(path, currentHref) {
+export function buildWebrtcFeedUrl(path, currentHref) {
 	const currentUrl = new URL(currentHref);
 	const feedUrl = new URL(path, currentUrl.origin);
+	const port =
+		currentUrl.protocol === 'http:' || currentUrl.protocol === 'https:' ? WEBRTC_PORT : '';
 
-	return `${currentUrl.origin}${feedUrl.pathname}${feedUrl.search}${feedUrl.hash}`;
+	return `${currentUrl.protocol}//${currentUrl.hostname}${port ? `:${port}` : ''}${feedUrl.pathname}${feedUrl.search}${feedUrl.hash}`;
+}
+
+/**
+ * @param {unknown} camera
+ */
+function getCameraName(camera) {
+	if (typeof camera === 'string') return camera.trim();
+
+	if (!camera || typeof camera !== 'object') return '';
+
+	const cameraRecord = /** @type {Record<string, unknown>} */ (camera);
+	const value = cameraRecord.name ?? cameraRecord.camera_name ?? cameraRecord.id;
+	return typeof value === 'string' ? value.trim() : '';
+}
+
+/**
+ * @param {unknown[]} cameras
+ * @returns {CameraFeed[]}
+ */
+export function createConfiguredCameraFeeds(cameras) {
+	return cameras
+		.map((camera) => getCameraName(camera))
+		.filter((name) => name.length > 0)
+		.map((name) => ({
+			id: slugify(name),
+			name,
+			path: `/${encodeURIComponent(name)}`
+		}));
 }
 
 /**
@@ -67,7 +71,7 @@ export function createCameraDeviceFeeds(devices) {
 			return {
 				id: slugify(device.id),
 				name,
-				path: `/webrtc/${encodeURIComponent(device.id)}`
+				path: `/${encodeURIComponent(device.id)}`
 			};
 		});
 }

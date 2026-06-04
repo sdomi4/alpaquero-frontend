@@ -10,14 +10,14 @@
 		status?: string;
 	};
 
-    type Props = {
-        device: Device;
-        children?: Snippet;
-        onLifecycleComplete?: (deviceId: string, action: 'startup' | 'shutdown') => void;
-        showStatus?: boolean;
-    };
+	type Props = {
+		device: Device;
+		children?: Snippet;
+		onLifecycleComplete?: (deviceId: string, action: 'startup' | 'shutdown') => void;
+		showStatus?: boolean;
+	};
 
-    let { device, children, onLifecycleComplete, showStatus = true }: Props = $props();
+	let { device, children, onLifecycleComplete, showStatus = true }: Props = $props();
 
 	let pending = $state(false);
 	let error = $state<string | null>(null);
@@ -31,11 +31,11 @@
 		error = null;
 
 		try {
-        const action = device.connected ? 'shutdown' : 'startup';
+			const action = device.connected ? 'shutdown' : 'startup';
 
-        await runDeviceLifecycleAction(device.type, device.id, action);
+			await runDeviceLifecycleAction(device.type, device.id, action);
 
-        onLifecycleComplete?.(device.id, action);
+			onLifecycleComplete?.(device.id, action);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Device action failed';
 		} finally {
@@ -45,27 +45,32 @@
 </script>
 
 <article
-	class="border-4 border-neutral-100 bg-neutral-950 p-3 shadow-[5px_5px_0_#f5f5f5]"
+	class="flex h-full max-h-full flex-col border border-neutral-700 bg-neutral-950 p-1.5 shadow-[2px_2px_0_#80499c]"
 	class:opacity-60={!device.connected}
 >
-	<header class="mb-3 flex items-start justify-between gap-3">
-		<div>
-			<p class="font-mono text-xs uppercase text-neutral-400">{device.type}</p>
-
-			<h3 class="text-xl font-black uppercase leading-tight">
+	<header class="mb-1.5 flex items-center justify-between gap-2">
+		<div class="flex min-w-0 items-center gap-1.5">
+			<h3 class="truncate text-xs leading-tight font-black uppercase">
 				{device.name}
 			</h3>
 
-			<p class="mt-1 font-mono text-xs text-neutral-500">{device.id}</p>
+			{#if showStatus}
+				<span
+					class="shrink-0 border border-neutral-700 bg-neutral-900 px-1.5 py-0.5 font-mono text-[0.6rem] leading-none text-purple-200 uppercase"
+				>
+					{displayStatus}
+				</span>
+			{/if}
 		</div>
 
 		<button
 			type="button"
 			onclick={toggleConnection}
 			disabled={pending}
-			class="shrink-0 border-2 border-neutral-100 px-2 py-1 font-mono text-xs font-black uppercase transition-transform active:translate-x-[2px] active:translate-y-[2px]"
-			class:bg-green-500={device.connected}
-			class:text-neutral-950={device.connected}
+			class="shrink-0 border px-1.5 py-0.5 font-mono text-[0.6rem] leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+			class:border-[#80499c]={device.connected}
+			class:bg-[#80499c]={device.connected}
+			class:text-neutral-50={device.connected}
 			class:bg-red-700={!device.connected}
 			class:text-neutral-100={!device.connected}
 			class:cursor-wait={pending}
@@ -81,17 +86,13 @@
 		</button>
 	</header>
 
-    {#if showStatus}
-        <p class="mb-3 border-2 border-neutral-100 bg-neutral-900 p-2 font-mono text-sm uppercase text-fuchsia-200">
-            {displayStatus}
-        </p>
-    {/if}
-
 	{#if error}
-		<p class="mb-3 border-2 border-red-500 bg-red-950 p-2 font-mono text-sm text-red-100">
+		<p class="mb-1 border border-red-500 bg-red-950 p-1 font-mono text-xs text-red-100">
 			{error}
 		</p>
 	{/if}
 
-	{@render children?.()}
+	<div class="min-h-0 flex-1">
+		{@render children?.()}
+	</div>
 </article>

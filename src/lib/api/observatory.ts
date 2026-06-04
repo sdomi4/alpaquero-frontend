@@ -11,6 +11,40 @@ const DEVICE_ENDPOINTS: Record<string, string> = {
 	safety_monitor: 'safety'
 };
 
+const OBSERVATORY_ACTION_PATHS: Record<ObservatoryAction, string[]> = {
+	startup: ['observatory/startup', 'observatory/devices/startup'],
+	shutdown: ['observatory/shutdown', 'observatory/devices/shutdown'],
+	emergency_halt: [
+		'observatory/emergency-halt',
+		'observatory/emergency_halt',
+		'observatory/emergency-stop',
+		'observatory/halt'
+	]
+};
+
+export type ObservatoryAction = 'startup' | 'shutdown' | 'emergency_halt';
+
+export async function runObservatoryAction(action: ObservatoryAction) {
+	const paths = OBSERVATORY_ACTION_PATHS[action];
+	let lastResponse: Response | null = null;
+
+	for (const path of paths) {
+		const res = await postObservatoryPath(path);
+
+		if (res.ok) {
+			return res.json().catch(() => null);
+		}
+
+		lastResponse = res;
+
+		if (res.status !== 404) break;
+	}
+
+	throw new Error(
+		`${action.replace('_', ' ')} failed: ${lastResponse?.status ?? 'unknown'} ${lastResponse?.statusText ?? ''}`.trim()
+	);
+}
+
 export async function runDeviceLifecycleAction(
 	deviceType: string,
 	deviceId: string,
@@ -22,18 +56,32 @@ export async function runDeviceLifecycleAction(
 		throw new Error(`No endpoint mapping for device type "${deviceType}"`);
 	}
 
-	const res = await fetch(
-		`${OBSERVATORY_API_BASE}/${endpoint}/${encodeURIComponent(deviceId)}/${action}`,
-		{
-			method: 'POST'
+	const primaryPath = `${endpoint}/${encodeURIComponent(deviceId)}/${action}`;
+	const res = await postObservatoryPath(primaryPath);
+
+	if (!res.ok && res.status === 404 && deviceType === 'switch') {
+		const fallbackRes = await postObservatoryPath(
+			`observatory/devices/${encodeURIComponent(deviceId)}/${action}`
+		);
+
+		if (fallbackRes.ok) {
+			return fallbackRes.json().catch(() => null);
 		}
-	);
+
+		throw new Error(`${action} failed: ${fallbackRes.status} ${fallbackRes.statusText}`);
+	}
 
 	if (!res.ok) {
 		throw new Error(`${action} failed: ${res.status} ${res.statusText}`);
 	}
 
 	return res.json().catch(() => null);
+}
+
+function postObservatoryPath(path: string) {
+	return fetch(`${OBSERVATORY_API_BASE}/${path}`, {
+		method: 'POST'
+	});
 }
 
 export async function moveFilterWheel(filterwheelId: string, position: number) {

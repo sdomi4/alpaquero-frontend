@@ -34,20 +34,19 @@
 			return 'border-yellow-300 bg-yellow-950 text-yellow-100';
 		}
 
-		return 'border-cyan-300 bg-cyan-950 text-cyan-100';
+		return 'border-[#80499c] bg-[#211428] text-purple-100';
 	}
 </script>
 
-<section class="border-4 border-neutral-100 bg-neutral-900 p-4 shadow-[8px_8px_0_#06b6d4]">
-	<div class="mb-3 flex items-end justify-between gap-3 border-b-4 border-neutral-100 pb-2">
-		<div>
-			<p class="font-mono text-xs text-neutral-400 uppercase">/ws/errors</p>
-			<h2 class="text-2xl font-black uppercase">Logger</h2>
-		</div>
+<section
+	class="flex h-full min-h-0 flex-col border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
+>
+	<div class="mb-2 flex items-center justify-between gap-3 border-b-2 border-neutral-700 pb-2">
+		<h2 class="text-lg leading-none font-black uppercase">Log</h2>
 
-		<div class="flex flex-col items-end gap-1 font-mono text-xs uppercase">
-			<span class="border-2 border-neutral-100 px-2 py-1">{status}</span>
-			<span class="text-neutral-400">{messages.length} messages</span>
+		<div class="flex items-center gap-2 font-mono text-[0.65rem] uppercase">
+			<span class="border border-neutral-600 px-2 py-1">{status}</span>
+			<span class="text-neutral-500">{messages.length}</span>
 		</div>
 	</div>
 
@@ -56,27 +55,27 @@
 			No websocket messages received.
 		</p>
 	{:else}
-		<ol class="grid max-h-[28rem] gap-3 overflow-y-auto pr-1">
+		<ol class="grid min-h-0 flex-1 gap-2 overflow-y-auto pr-1">
 			{#each messages as message (message.id)}
-				<li class="border-2 border-neutral-600 bg-neutral-950 p-3">
-					<div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+				<li class="border border-neutral-700 bg-neutral-950 p-2">
+					<div class="mb-1 flex flex-wrap items-center justify-between gap-2">
 						<span
-							class={`border-2 px-2 py-1 font-mono text-xs font-black uppercase ${levelClass(message.level)}`}
+							class={`border px-2 py-1 font-mono text-[0.65rem] leading-none font-black uppercase ${levelClass(message.level)}`}
 						>
 							{message.level}
 						</span>
 
-						<time class="font-mono text-xs text-neutral-500" datetime={message.timestamp}>
+						<time class="font-mono text-[0.65rem] text-neutral-500" datetime={message.timestamp}>
 							{formatTimestamp(message.timestamp)}
 						</time>
 					</div>
 
-					<p class="font-mono text-sm leading-relaxed text-neutral-100">{message.message}</p>
+					<p class="font-mono text-xs leading-snug text-neutral-100">{message.message}</p>
 
-					<details class="mt-2 font-mono text-xs text-neutral-500">
+					<details class="mt-1 font-mono text-[0.65rem] text-neutral-500">
 						<summary class="cursor-pointer uppercase">raw</summary>
 						<pre
-							class="mt-2 border border-neutral-700 bg-neutral-900 p-2 break-words whitespace-pre-wrap">{message.raw}</pre>
+							class="mt-1 border border-neutral-700 bg-neutral-900 p-1 break-words whitespace-pre-wrap">{message.raw}</pre>
 					</details>
 				</li>
 			{/each}

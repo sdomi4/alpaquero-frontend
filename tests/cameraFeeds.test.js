@@ -2,45 +2,35 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
-	buildSameHostFeedUrl,
-	createCameraDeviceFeeds,
-	parseWebrtcFeedConfig
+	buildWebrtcFeedUrl,
+	createConfiguredCameraFeeds,
+	createCameraDeviceFeeds
 } from '../src/lib/cameraFeeds.js';
 
-test('parseWebrtcFeedConfig reads named feed paths from a comma-separated config', () => {
-	assert.deepEqual(parseWebrtcFeedConfig('All Sky|/webrtc/allsky, Dome|webrtc/dome'), [
+test('buildWebrtcFeedUrl puts feed URLs on port 8889 of the frontend host', () => {
+	assert.equal(
+		buildWebrtcFeedUrl('/allsky?autoplay=1', 'https://frontend.test/control'),
+		'https://frontend.test:8889/allsky?autoplay=1'
+	);
+	assert.equal(
+		buildWebrtcFeedUrl('http://backend.test/dome', 'http://127.0.0.1:5173/control'),
+		'http://127.0.0.1:8889/dome'
+	);
+});
+
+test('createConfiguredCameraFeeds turns backend camera names into WebRTC paths', () => {
+	assert.deepEqual(createConfiguredCameraFeeds(['sim_camera', { name: 'dome cam' }]), [
 		{
-			id: 'all-sky',
-			name: 'All Sky',
-			path: '/webrtc/allsky'
+			id: 'sim-camera',
+			name: 'sim_camera',
+			path: '/sim_camera'
 		},
 		{
-			id: 'dome',
-			name: 'Dome',
-			path: 'webrtc/dome'
+			id: 'dome-cam',
+			name: 'dome cam',
+			path: '/dome%20cam'
 		}
 	]);
-});
-
-test('parseWebrtcFeedConfig ignores malformed or empty feed entries', () => {
-	assert.deepEqual(parseWebrtcFeedConfig(' , Missing Path| , /bare-path , Pier|/webrtc/pier'), [
-		{
-			id: 'pier',
-			name: 'Pier',
-			path: '/webrtc/pier'
-		}
-	]);
-});
-
-test('buildSameHostFeedUrl keeps feed URLs on the frontend host', () => {
-	assert.equal(
-		buildSameHostFeedUrl('/webrtc/allsky?autoplay=1', 'https://frontend.test/control'),
-		'https://frontend.test/webrtc/allsky?autoplay=1'
-	);
-	assert.equal(
-		buildSameHostFeedUrl('http://backend.test/webrtc/dome', 'https://frontend.test/control'),
-		'https://frontend.test/webrtc/dome'
-	);
 });
 
 test('createCameraDeviceFeeds uses configured camera devices as default feeds', () => {
@@ -53,7 +43,7 @@ test('createCameraDeviceFeeds uses configured camera devices as default feeds', 
 			{
 				id: 'main-cam',
 				name: 'Main Camera',
-				path: '/webrtc/main%20cam'
+				path: '/main%20cam'
 			}
 		]
 	);

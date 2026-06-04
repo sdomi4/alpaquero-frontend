@@ -32,9 +32,13 @@
 		)
 	);
 
-    const positionLabel = $derived(
-        currentPosition === -1 ? 'moving' : Number.isNaN(currentPosition) ? '—' : String(currentPosition)
-    );
+	const positionLabel = $derived(
+		currentPosition === -1
+			? 'moving'
+			: Number.isNaN(currentPosition)
+				? '--'
+				: String(currentPosition)
+	);
 
 	const filterNames = $derived(
 		Array.isArray(device.state?.names)
@@ -45,6 +49,7 @@
 	);
 
 	const positionCount = $derived(filterNames.length > 0 ? filterNames.length : 8);
+	const positions = $derived(Array.from({ length: positionCount }, (_, position) => position));
 
 	async function moveToPosition(position: number) {
 		if (pending || !device.connected) return;
@@ -63,56 +68,59 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid gap-3">
-        <div class="border-2 border-neutral-600 bg-neutral-900 p-2">
-            <p class="text-xs uppercase text-neutral-400">Current</p>
-            <p class="text-2xl font-black">
-                {positionLabel}
-            </p>
-        </div>
+	<div class="grid gap-1.5">
+		<div class="grid grid-cols-[auto_5rem_auto] items-stretch gap-1.5 font-mono">
+			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+				<span class="text-[0.65rem] text-neutral-400 uppercase">Current</span>
+				<span class="ml-2 text-sm leading-none font-black">{positionLabel}</span>
+			</div>
 
-        <div class="border-2 border-neutral-600 bg-neutral-900 p-2">
-            <p class="text-xs uppercase text-neutral-400">Target</p>
-            <input
-                type="number"
-                min="0"
-                max={positionCount - 1}
-                bind:value={targetPosition}
-                disabled={!device.connected || pending || currentPosition === -1}
-                class="mt-1 w-full border-2 border-neutral-500 bg-neutral-950 px-2 py-1 font-mono text-xl font-black text-neutral-100 outline-none focus:border-neutral-100"
-            />
-        </div>
+			<label class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+				<span class="text-[0.65rem] text-neutral-400 uppercase">Target</span>
+				<input
+					type="number"
+					min="0"
+					max={positionCount - 1}
+					bind:value={targetPosition}
+					disabled={!device.connected || pending || currentPosition === -1}
+					class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 font-mono text-xs font-black text-neutral-100 outline-none focus:border-[#80499c]"
+				/>
+			</label>
 
-        <button
-            type="button"
-            disabled={!device.connected || pending || currentPosition === -1}
-            onclick={() => moveToPosition(targetPosition)}
-            class="border-4 border-neutral-100 bg-neutral-800 px-3 py-2 font-mono text-sm font-black uppercase text-neutral-100 shadow-[4px_4px_0_#737373] transition-transform hover:bg-neutral-700 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
-        >
-            {pending || currentPosition === -1 ? 'moving' : 'move wheel'}
-        </button>
+			<button
+				type="button"
+				disabled={!device.connected || pending || currentPosition === -1}
+				onclick={() => moveToPosition(targetPosition)}
+				class="border border-[#80499c] bg-neutral-800 px-3 py-1 font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+			>
+				{pending || currentPosition === -1 ? 'moving' : 'move'}
+			</button>
+		</div>
 
-		<div class="grid grid-cols-2 gap-2">
-			{#each Array.from({ length: positionCount }) as _, position}
-                <button
-                    type="button"
-                    disabled={!device.connected || pending || currentPosition === -1}
-                    onclick={() => moveToPosition(position)}
-                    class="border-2 border-neutral-500 px-2 py-2 text-left font-mono text-sm font-black uppercase shadow-[3px_3px_0_#525252] transition-transform hover:border-neutral-100 hover:bg-neutral-800 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:hover:bg-neutral-950"
-                    class:border-yellow-300={position === currentPosition}
-                    class:bg-yellow-300={position === currentPosition}
-                    class:text-neutral-950={position === currentPosition}
-                    class:bg-neutral-950={position !== currentPosition}
-                    class:text-neutral-200={position !== currentPosition}
-                >
-                    <span class="block text-xs opacity-70">pos {position}</span>
-                    <span>{filterNames[position] ?? `Filter ${position}`}</span>
-                </button>
+		<div
+			class="grid max-h-[5.75rem] grid-cols-[repeat(auto-fit,minmax(6rem,1fr))] gap-1.5 overflow-y-auto pr-1"
+		>
+			{#each positions as position (position)}
+				<button
+					type="button"
+					disabled={!device.connected || pending || currentPosition === -1}
+					onclick={() => moveToPosition(position)}
+					class="min-w-0 border px-1.5 py-1 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:border-[#80499c] hover:bg-neutral-800 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:hover:bg-neutral-950"
+					class:border-[#80499c]={position === currentPosition}
+					class:bg-[#80499c]={position === currentPosition}
+					class:text-neutral-50={position === currentPosition}
+					class:bg-neutral-950={position !== currentPosition}
+					class:text-neutral-200={position !== currentPosition}
+				>
+					<span class="mr-1 opacity-70">{position}</span>
+					<span class="truncate leading-tight">{filterNames[position] ?? `Filter ${position}`}</span
+					>
+				</button>
 			{/each}
 		</div>
 
 		{#if error}
-			<p class="border-2 border-red-500 bg-red-950 p-2 font-mono text-sm text-red-100">
+			<p class="border border-red-500 bg-red-950 p-1 font-mono text-xs text-red-100">
 				{error}
 			</p>
 		{/if}
