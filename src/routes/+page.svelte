@@ -6,6 +6,7 @@
 	import ErrorToast from '$lib/components/ErrorToast.svelte';
 	import GenericDeviceBlock from '$lib/components/devices/GenericDeviceBlock.svelte';
 	import FilterWheelBlock from '$lib/components/devices/FilterWheelBlock.svelte';
+	import TelescopeBlock from '$lib/components/devices/TelescopeBlock.svelte';
 	import SequencePanel from '$lib/components/sequences/SequencePanel.svelte';
 	import DomeBlock from '$lib/components/devices/DomeBlock.svelte';
 	import CoverBlock from '$lib/components/devices/CoverBlock.svelte';
@@ -410,17 +411,20 @@
 	function renderDevice(device: MergedDevice) {
 		return {
 			FilterWheelBlock,
+			TelescopeBlock,
 			DomeBlock,
 			CoverBlock,
 			GenericDeviceBlock,
 			component:
 				device.type === 'filterwheel'
 					? FilterWheelBlock
-					: device.type === 'dome'
-						? DomeBlock
-						: device.type === 'cover'
-							? CoverBlock
-							: GenericDeviceBlock
+					: device.type === 'telescope'
+						? TelescopeBlock
+						: device.type === 'dome'
+							? DomeBlock
+							: device.type === 'cover'
+								? CoverBlock
+								: GenericDeviceBlock
 		}.component;
 	}
 
@@ -428,6 +432,7 @@
 		const base = 'h-40 shrink-0';
 
 		if (device.type === 'cover') return `${base} w-fit min-w-[38rem] max-w-[42rem]`;
+		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-[46rem] max-w-[52rem]';
 		if (device.type === 'filterwheel') return `${base} w-fit min-w-[30rem] max-w-[36rem]`;
 		if (device.type === 'dome') return `${base} w-fit min-w-[24rem] max-w-[28rem]`;
 		if (device.type === 'switch') return `${base} w-fit min-w-[42rem] max-w-[64rem]`;
@@ -628,7 +633,9 @@
 	<section
 		class="flex h-full min-h-0 flex-col overflow-hidden border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
 	>
-		<div class="mb-2 flex shrink-0 items-center justify-between gap-3 border-b-2 border-neutral-700 pb-2">
+		<div
+			class="mb-2 flex shrink-0 items-center justify-between gap-3 border-b-2 border-neutral-700 pb-2"
+		>
 			<div class="flex min-w-0 flex-wrap items-center gap-2">
 				<h2 class="shrink-0 text-lg leading-none font-black uppercase">Device Controls</h2>
 
@@ -703,7 +710,7 @@
 						No configured control devices reported by backend.
 					</p>
 				{:else}
-					<div class="h-full min-h-0 overflow-x-auto overflow-y-hidden pb-1 pr-1">
+					<div class="h-full min-h-0 overflow-x-auto overflow-y-hidden pr-1 pb-1">
 						<div class="flex h-full min-w-max items-stretch gap-2 pr-2">
 							{#each activeControlDevices as device (device.id)}
 								<div class={deviceControlFrameClass(device) + ' h-full min-h-0'}>

@@ -1,3 +1,5 @@
+import { buildTelescopeCommandRequest } from './telescopeRequests.js';
+
 const OBSERVATORY_API_BASE = '/api/observatory';
 
 const DEVICE_ENDPOINTS: Record<string, string> = {
@@ -97,6 +99,43 @@ export async function moveFilterWheel(filterwheelId: string, position: number) {
 	}
 
 	return res.json().catch(() => null);
+}
+
+async function runTelescopeCommand(
+	telescopeId: string,
+	command: 'park' | 'unpark' | 'slew' | 'sun',
+	safetyOverride = false,
+	coordinates?: { ra: number; dec: number }
+) {
+	const request = buildTelescopeCommandRequest(telescopeId, command, safetyOverride, coordinates);
+	const res = await fetch(request.path, request.init);
+
+	if (!res.ok) {
+		throw new Error(`Telescope ${command} failed: ${res.status} ${res.statusText}`);
+	}
+
+	return res.json().catch(() => null);
+}
+
+export async function parkTelescope(telescopeId: string, safetyOverride = false) {
+	return runTelescopeCommand(telescopeId, 'park', safetyOverride);
+}
+
+export async function unparkTelescope(telescopeId: string, safetyOverride = false) {
+	return runTelescopeCommand(telescopeId, 'unpark', safetyOverride);
+}
+
+export async function slewTelescope(
+	telescopeId: string,
+	ra: number,
+	dec: number,
+	safetyOverride = false
+) {
+	return runTelescopeCommand(telescopeId, 'slew', safetyOverride, { ra, dec });
+}
+
+export async function slewTelescopeToSun(telescopeId: string, safetyOverride = false) {
+	return runTelescopeCommand(telescopeId, 'sun', safetyOverride);
 }
 
 export async function runSequence(sequenceName: string) {
