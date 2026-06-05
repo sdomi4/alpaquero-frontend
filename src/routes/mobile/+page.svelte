@@ -12,13 +12,11 @@
 	import CoverBlock from '$lib/components/devices/CoverBlock.svelte';
 	import SwitchBlock from '$lib/components/devices/SwitchBlock.svelte';
 	import type { SwitchControl } from '$lib/components/devices/SwitchBlock.svelte';
-	import WebsocketLogger from '$lib/components/WebsocketLogger.svelte';
-	import logo from '$lib/assets/Arriero_Logo_Mono_Clear.svg';
 	import { getSwitchControls, runObservatoryAction } from '$lib/api/observatory';
 	import type { ObservatoryAction } from '$lib/api/observatory';
 	import { createCameraDeviceFeeds, createConfiguredCameraFeeds } from '$lib/cameraFeeds.js';
 	import {
-		createControlTabs,
+		createMobileControlOptions,
 		getControlDevices,
 		mergeConfiguredDevices
 	} from '$lib/controlModel.js';
@@ -67,24 +65,20 @@
 	};
 
 	let liveSequences = $state<Record<string, ActiveSequence>>({});
-
 	let liveDevices = $state<Record<string, DeviceState>>({});
 	let wsStatus = $state<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
-	let errorWsStatus = $state<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
-	let websocketMessages = $state<LogMessage[]>([]);
 	let latestErrorMessage = $state<LogMessage | null>(null);
 	let websocketMessageCounter = 0;
 	let observatoryName = $state('Observatory');
 	let backendObservatoryStatus = $state('');
 	let observatoryStateStatus = $state<ObservatoryStateStatus | null>(null);
-	let activeControlTab = $state('');
+	let selectedControlId = $state('sequences');
 	let switchControlsByDevice = $state<Record<string, SwitchControl[]>>({});
 	let switchControlLoadStatus = $state<Record<string, 'loading' | 'loaded' | 'error'>>({});
 	let switchControlErrors = $state<Record<string, string | null>>({});
 	let observatoryActionPending = $state<ObservatoryAction | null>(null);
 	let observatoryActionError = $state<string | null>(null);
 
-	const DEVICE_CONTROLS_PER_PAGE = 4;
 	const OBSERVATORY_ACTIONS: Array<{
 		action: ObservatoryAction;
 		title: string;
@@ -104,27 +98,20 @@
 			? backendCameraFeeds
 			: createCameraDeviceFeeds(data.devices);
 	});
-	const observingConditionsDevice = $derived(
-		mergedDevices.find((device) => device.type === 'observing_conditions') ?? null
-	);
 	const safetyMonitorDevice = $derived(
 		mergedDevices.find((device) => device.type === 'safety_monitor') ?? null
 	);
 	const controlDevices = $derived(getControlDevices(mergedDevices) as MergedDevice[]);
 	const switchDevices = $derived(controlDevices.filter((device) => device.type === 'switch'));
-	const controlTabs = $derived(
-		createControlTabs(controlDevices, DEVICE_CONTROLS_PER_PAGE) as Array<{
-			id: string;
-			label: string;
-			devices: MergedDevice[];
-			kind: 'controls' | 'switches';
-		}>
+	const controlOptions = $derived(createMobileControlOptions(controlDevices));
+	const selectedControl = $derived(
+		controlOptions.find((option) => option.id === selectedControlId) ?? controlOptions[0] ?? null
 	);
-	const activeControlTabModel = $derived(
-		controlTabs.find((tab) => tab.id === activeControlTab) ?? controlTabs[0] ?? null
+	const selectedDevice = $derived(
+		selectedControl?.kind === 'device'
+			? (controlDevices.find((device) => device.id === selectedControl.deviceId) ?? null)
+			: null
 	);
-	const activeControlDevices = $derived(activeControlTabModel?.devices ?? []);
-	const showControlTabs = $derived(controlTabs.length > 1);
 	const observatoryStatus = $derived(
 		backendObservatoryStatus ||
 			(typeof observatoryStateStatus?.status === 'string' && observatoryStateStatus.status.trim()
@@ -137,8 +124,8 @@
 	const safetyState = $derived(getSafetyState(safetyMonitorDevice, safetyStatus));
 
 	$effect(() => {
-		if (!controlTabs.some((tab) => tab.id === activeControlTab)) {
-			activeControlTab = controlTabs[0]?.id ?? '';
+		if (!controlOptions.some((option) => option.id === selectedControlId)) {
+			selectedControlId = controlOptions[0]?.id ?? '';
 		}
 	});
 
@@ -178,10 +165,8 @@
 		const parsed = parseObservatoryLogMessage(raw);
 		const message = {
 			...parsed,
-			id: `errors-ws-${websocketMessageCounter++}`
+			id: `mobile-errors-ws-${websocketMessageCounter++}`
 		};
-
-		websocketMessages = [message, ...websocketMessages].slice(0, 100);
 
 		if (message.level.toLowerCase() === 'error') {
 			latestErrorMessage = message;
@@ -388,18 +373,6 @@
 		}.component;
 	}
 
-	function deviceControlFrameClass(device: MergedDevice) {
-		const base = 'h-40 shrink-0';
-
-		if (device.type === 'cover') return `${base} w-fit min-w-[38rem] max-w-[42rem]`;
-		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-[46rem] max-w-[52rem]';
-		if (device.type === 'filterwheel') return `${base} w-fit min-w-[30rem] max-w-[36rem]`;
-		if (device.type === 'dome') return `${base} w-fit min-w-[24rem] max-w-[28rem]`;
-		if (device.type === 'switch') return `${base} w-fit min-w-[42rem] max-w-[64rem]`;
-
-		return `${base} w-fit min-w-[22rem] max-w-[30rem]`;
-	}
-
 	function observatoryActionLabel(action: ObservatoryAction) {
 		if (action === 'startup') return 'Start';
 		if (action === 'shutdown') return 'Stop';
@@ -417,7 +390,6 @@
 		ws.onmessage = (event) => {
 			try {
 				const payload = JSON.parse(event.data) as Record<string, unknown>;
-				console.log('Received websocket message:', payload);
 				const devices = (payload.devices ?? {}) as Record<string, unknown>;
 				liveSequences = (payload.sequences ?? {}) as Record<string, ActiveSequence>;
 				observatoryName =
@@ -468,21 +440,9 @@
 			wsStatus = 'disconnected';
 		};
 
-		errorWs.onopen = () => {
-			errorWsStatus = 'connected';
-		};
-
 		errorWs.onmessage = (event) => {
 			const raw = typeof event.data === 'string' ? event.data : String(event.data);
 			appendWebsocketMessage(raw);
-		};
-
-		errorWs.onerror = () => {
-			errorWsStatus = 'error';
-		};
-
-		errorWs.onclose = () => {
-			errorWsStatus = 'disconnected';
 		};
 
 		return () => {
@@ -493,40 +453,26 @@
 </script>
 
 <svelte:head>
-	<title>Alpaquero / Arriero</title>
+	<title>Alpaquero Mobile Control</title>
 </svelte:head>
 
 <ErrorToast message={latestErrorMessage} onDismiss={dismissErrorToast} />
 
 <main
-	class="grid h-screen grid-rows-[auto_minmax(0,1fr)_minmax(14.5rem,0.64fr)] gap-2 overflow-hidden bg-neutral-950 p-2 text-neutral-100"
+	class="grid h-dvh grid-rows-[auto_minmax(0,1fr)] gap-2 overflow-hidden bg-neutral-950 p-2 text-neutral-100"
 >
 	<header
-		class="grid gap-3 border-2 border-neutral-700 bg-neutral-900 p-2 text-neutral-100 shadow-[4px_4px_0_#80499c] lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr] lg:items-center"
+		class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-2 border-neutral-700 bg-neutral-900 p-2 text-neutral-100 shadow-[4px_4px_0_#80499c]"
 	>
-		<div class="flex items-center gap-3">
-			<img src={logo} alt="" class="h-10 w-10 object-contain" />
-			<h1
-				class="text-3xl leading-none font-semibold uppercase md:text-4xl"
-				style:font-family="'Saira Extra Condensed', sans-serif"
-			>
-				Alpaquero
-			</h1>
-		</div>
-
-		<div class="font-mono text-sm uppercase">
-			<p class="text-[0.65rem] font-black tracking-[0.2em] text-purple-200">Observatory</p>
-			<p class="truncate text-sm font-black">{observatoryName}</p>
-		</div>
-
 		<div
-			class="justify-self-center border border-[#80499c] bg-[#211428] px-3 py-1.5 font-mono text-xs text-purple-100 uppercase"
+			class="min-w-0 border border-[#80499c] bg-[#211428] px-2 py-1.5 font-mono text-xs text-purple-100 uppercase"
 		>
-			{observatoryStatus}
+			<p class="text-[0.6rem] leading-none font-black tracking-[0.16em]">Status</p>
+			<p class="mt-1 truncate text-sm leading-none font-black">{observatoryStatus}</p>
 		</div>
 
 		<div
-			class="justify-self-start border-2 px-3 py-1.5 font-mono text-sm uppercase shadow-[3px_3px_0_#80499c] lg:justify-self-end"
+			class="max-w-[8.5rem] min-w-0 border-2 px-2 py-1.5 font-mono text-xs uppercase shadow-[2px_2px_0_#80499c]"
 			class:border-emerald-300={safetyState === 'safe'}
 			class:bg-emerald-950={safetyState === 'safe'}
 			class:text-emerald-100={safetyState === 'safe'}
@@ -537,167 +483,119 @@
 			class:bg-neutral-950={safetyState === 'unknown'}
 			class:text-neutral-300={safetyState === 'unknown'}
 		>
-			<p class="text-[0.65rem] leading-none font-black tracking-[0.2em]">Safety</p>
-			<p class="mt-1 truncate text-base leading-none font-black">{safetyStatus}</p>
+			<p class="text-[0.6rem] leading-none font-black tracking-[0.16em]">Safety</p>
+			<p class="mt-1 truncate text-sm leading-none font-black">{safetyStatus}</p>
 		</div>
 
 		<div
-			class="justify-self-start border border-[#80499c] bg-[#211428] px-3 py-1.5 font-mono text-xs text-purple-100 uppercase lg:justify-self-end"
+			class="border border-[#80499c] bg-[#211428] px-2 py-1.5 font-mono text-[0.65rem] text-purple-100 uppercase"
 		>
-			User menu
+			User
 		</div>
 	</header>
 
-	{#if data.error}
-		<section class="border-2 border-red-500 bg-red-950 p-2 text-red-100 shadow-[4px_4px_0_#ef4444]">
-			<p class="font-black uppercase">Backend unavailable</p>
-			<p class="font-mono">{data.error}</p>
-		</section>
-	{/if}
-
-	<section class="grid min-h-0 gap-2 xl:grid-cols-[minmax(0,3fr)_minmax(24rem,2fr)]">
-		<CameraFeed feeds={cameraFeeds} />
-
-		<aside class="grid min-h-0 grid-rows-[minmax(0,0.58fr)_minmax(0,1fr)] gap-2">
-			<section class="min-h-0">
-				<SequencePanel availableSequences={data.sequences} activeSequences={liveSequences} />
-			</section>
-
-			<div class="grid min-h-0 gap-2 2xl:grid-cols-2">
-				{#if observingConditionsDevice}
-					<GenericDeviceBlock
-						device={observingConditionsDevice}
-						onLifecycleComplete={handleLifecycleComplete}
-					/>
-				{:else}
-					<section
-						class="h-full border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
-					>
-						<div class="mb-2 border-b-2 border-neutral-700 pb-2">
-							<h2 class="text-lg font-black uppercase">Conditions</h2>
-						</div>
-
-						<p
-							class="border border-dashed border-neutral-700 p-2 font-mono text-xs text-neutral-500"
-						>
-							No observing conditions device configured.
-						</p>
-					</section>
-				{/if}
-
-				<WebsocketLogger messages={websocketMessages} status={errorWsStatus} />
-			</div>
-		</aside>
-	</section>
-
-	<section
-		class="flex h-full min-h-0 flex-col overflow-hidden border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
-	>
-		<div
-			class="mb-2 flex shrink-0 items-center justify-between gap-3 border-b-2 border-neutral-700 pb-2"
-		>
-			<div class="flex min-w-0 flex-wrap items-center gap-2">
-				<h2 class="shrink-0 text-lg leading-none font-black uppercase">Device Controls</h2>
-
-				{#if showControlTabs}
-					<nav class="flex flex-wrap gap-1" aria-label="Device control tabs">
-						{#each controlTabs as tab (tab.id)}
-							<button
-								type="button"
-								onclick={() => {
-									activeControlTab = tab.id;
-								}}
-								class="border px-2 py-1 font-mono text-[0.65rem] leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
-								class:border-[#80499c]={tab.id === activeControlTabModel?.id}
-								class:bg-[#80499c]={tab.id === activeControlTabModel?.id}
-								class:text-neutral-50={tab.id === activeControlTabModel?.id}
-								class:border-neutral-600={tab.id !== activeControlTabModel?.id}
-								class:bg-neutral-950={tab.id !== activeControlTabModel?.id}
-								class:text-neutral-300={tab.id !== activeControlTabModel?.id}
-								aria-pressed={tab.id === activeControlTabModel?.id}
-							>
-								{tab.label}
-							</button>
-						{/each}
-					</nav>
-				{/if}
-			</div>
-
-			<div class="flex min-w-0 items-center gap-2 font-mono text-xs uppercase">
-				{#if observatoryActionError}
-					<span class="max-w-64 truncate border border-red-500 bg-red-950 px-2 py-1 text-red-100">
-						{observatoryActionError}
-					</span>
-				{/if}
-
-				<span class="shrink-0 border border-[#80499c] bg-[#211428] px-2 py-1 text-purple-100">
-					{observatoryStatus}
-				</span>
-
-				<span class="max-w-72 truncate text-neutral-400">
-					{observatoryStateMessage}
-				</span>
-			</div>
+	<section class="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
+		<div class="min-h-0">
+			<CameraFeed feeds={cameraFeeds} />
 		</div>
 
-		<div class="grid min-h-0 flex-1 grid-cols-[3rem_minmax(0,1fr)] gap-2">
-			<aside class="flex h-40 flex-col gap-2 self-start" aria-label="Observatory controls">
-				{#each OBSERVATORY_ACTIONS as item (item.action)}
-					<button
-						type="button"
-						title={item.title}
-						disabled={observatoryActionPending !== null}
-						onclick={() => handleObservatoryAction(item.action)}
-						class="grid size-12 place-items-center border-2 font-mono text-[0.6rem] leading-none font-black uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
-						class:border-emerald-400={item.tone === 'start'}
-						class:bg-emerald-950={item.tone === 'start'}
-						class:text-emerald-100={item.tone === 'start'}
-						class:border-yellow-300={item.tone === 'stop'}
-						class:bg-yellow-950={item.tone === 'stop'}
-						class:text-yellow-100={item.tone === 'stop'}
-						class:border-red-400={item.tone === 'halt'}
-						class:bg-red-950={item.tone === 'halt'}
-						class:text-red-100={item.tone === 'halt'}
-					>
-						{observatoryActionPending === item.action ? '...' : observatoryActionLabel(item.action)}
-					</button>
-				{/each}
-			</aside>
+		<section
+			class="flex min-h-0 flex-col overflow-hidden border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
+		>
+			<div class="mb-2 grid shrink-0 gap-2 border-b-2 border-neutral-700 pb-2">
+				<div class="flex min-w-0 items-center justify-between gap-2">
+					<h2 class="text-base leading-none font-black uppercase">Control</h2>
 
-			<div class="h-full min-h-0 min-w-0">
-				{#if controlDevices.length === 0}
-					<p class="font-mono text-neutral-400">
-						No configured control devices reported by backend.
-					</p>
-				{:else}
-					<div class="h-full min-h-0 overflow-x-auto overflow-y-hidden pr-1 pb-1">
-						<div class="flex h-full min-w-max items-stretch gap-2 pr-2">
-							{#each activeControlDevices as device (device.id)}
-								<div class={deviceControlFrameClass(device) + ' h-full min-h-0'}>
-									{#if device.type === 'switch'}
-										{@const switchControls = switchControlsForDevice(device)}
+					<span class="truncate font-mono text-[0.65rem] text-neutral-400 uppercase">
+						{observatoryStateMessage}
+					</span>
+				</div>
 
-										<SwitchBlock
-											{device}
-											controls={switchControls}
-											controlsLoading={switchControls.length === 0 &&
-												switchControlsLoadingForDevice(device)}
-											controlsError={switchControls.length === 0
-												? switchControlsErrorForDevice(device)
-												: null}
-											onLifecycleComplete={handleLifecycleComplete}
-										/>
-									{:else}
-										{@const DeviceComponent = renderDevice(device)}
+				<select
+					bind:value={selectedControlId}
+					class="w-full border border-[#80499c] bg-neutral-950 px-2 py-2 font-mono text-sm font-black text-neutral-100 uppercase outline-none focus:border-purple-300"
+					aria-label="Select control"
+				>
+					{#each controlOptions as option (option.id)}
+						<option value={option.id}>{option.label}</option>
+					{/each}
+				</select>
+			</div>
 
-										<DeviceComponent {device} onLifecycleComplete={handleLifecycleComplete} />
-									{/if}
-								</div>
+			{#if data.error}
+				<p
+					class="mb-2 shrink-0 border border-red-500 bg-red-950 p-2 font-mono text-xs text-red-100"
+				>
+					{data.error}
+				</p>
+			{/if}
+
+			<div class="min-h-0 flex-1 overflow-y-auto pr-1">
+				{#if selectedControl?.kind === 'sequences'}
+					<SequencePanel availableSequences={data.sequences} activeSequences={liveSequences} />
+				{:else if selectedControl?.kind === 'observatory-actions'}
+					<section class="grid h-full min-h-[10rem] content-start gap-2">
+						<div class="grid grid-cols-3 gap-2" aria-label="Observatory controls">
+							{#each OBSERVATORY_ACTIONS as item (item.action)}
+								<button
+									type="button"
+									title={item.title}
+									disabled={observatoryActionPending !== null}
+									onclick={() => handleObservatoryAction(item.action)}
+									class="min-h-16 border-2 font-mono text-xs leading-none font-black uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+									class:border-emerald-400={item.tone === 'start'}
+									class:bg-emerald-950={item.tone === 'start'}
+									class:text-emerald-100={item.tone === 'start'}
+									class:border-yellow-300={item.tone === 'stop'}
+									class:bg-yellow-950={item.tone === 'stop'}
+									class:text-yellow-100={item.tone === 'stop'}
+									class:border-red-400={item.tone === 'halt'}
+									class:bg-red-950={item.tone === 'halt'}
+									class:text-red-100={item.tone === 'halt'}
+								>
+									{observatoryActionPending === item.action
+										? '...'
+										: observatoryActionLabel(item.action)}
+								</button>
 							{/each}
 						</div>
+
+						{#if observatoryActionError}
+							<p class="border border-red-500 bg-red-950 p-2 font-mono text-xs text-red-100">
+								{observatoryActionError}
+							</p>
+						{/if}
+					</section>
+				{:else if selectedDevice}
+					<div class="h-full min-h-[10rem]">
+						{#if selectedDevice.type === 'switch'}
+							{@const switchControls = switchControlsForDevice(selectedDevice)}
+
+							<SwitchBlock
+								device={selectedDevice}
+								controls={switchControls}
+								controlsLoading={switchControls.length === 0 &&
+									switchControlsLoadingForDevice(selectedDevice)}
+								controlsError={switchControls.length === 0
+									? switchControlsErrorForDevice(selectedDevice)
+									: null}
+								onLifecycleComplete={handleLifecycleComplete}
+							/>
+						{:else}
+							{@const DeviceComponent = renderDevice(selectedDevice)}
+
+							<DeviceComponent
+								device={selectedDevice}
+								onLifecycleComplete={handleLifecycleComplete}
+							/>
+						{/if}
 					</div>
+				{:else}
+					<p class="border border-dashed border-neutral-700 p-2 font-mono text-xs text-neutral-500">
+						No configured control devices reported by backend.
+					</p>
 				{/if}
 			</div>
-		</div>
+		</section>
 	</section>
 </main>
