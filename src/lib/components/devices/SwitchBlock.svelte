@@ -141,7 +141,7 @@
 			</div>
 		{:else}
 			<div
-				class="grid max-h-[7.25rem] grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-1.5 overflow-y-auto pr-1"
+				class="grid max-h-full grid-cols-[repeat(3,max-content)] gap-1.5 overflow-y-auto pr-1"
 			>
 				{#each controls as control (control.id)}
 					{@const value = valueFor(control)}

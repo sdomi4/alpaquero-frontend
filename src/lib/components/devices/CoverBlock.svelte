@@ -122,10 +122,10 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid gap-1.5">
-		<div class="grid grid-cols-[1fr_1fr_1.35fr_auto] gap-1.5 font-mono">
+	<div class="grid h-full w-fit content-start gap-1.5">
+		<div class="grid w-fit grid-cols-[max-content_max-content] gap-1.5 font-mono">
 			<div
-				class="min-w-0 border bg-neutral-900 p-1.5"
+				class="min-w-30 border bg-neutral-900 p-1.5"
 				class:border-neutral-500={!coverError}
 				class:border-red-500={coverError}
 				class:bg-red-950={coverError}
@@ -135,7 +135,7 @@
 			</div>
 
 			<div
-				class="min-w-0 border bg-neutral-900 p-1.5"
+				class="min-w-30 border bg-neutral-900 p-1.5"
 				class:border-neutral-500={!calibratorError}
 				class:border-red-500={calibratorError}
 				class:bg-red-950={calibratorError}
@@ -144,14 +144,13 @@
 				<p class="truncate text-base leading-none font-black uppercase">{calibratorLabel}</p>
 			</div>
 
-			<div
-				class="grid min-w-0 grid-cols-[1fr_3.75rem] items-center gap-1.5 border border-neutral-700 bg-neutral-900 p-1.5"
-			>
+			<div class="grid min-w-30 gap-1.5 border border-neutral-700 bg-neutral-900 p-1.5">
 				<div class="min-w-0">
 					<p class="text-[0.65rem] text-neutral-400 uppercase">Brightness</p>
 					<p class="truncate text-base leading-none font-black">
 						{Number.isNaN(brightness) ? '--' : brightness}
 					</p>
+
 					<input
 						id={`brightness-slider-${device.id}`}
 						type="range"
@@ -160,15 +159,15 @@
 						step="1"
 						bind:value={targetBrightness}
 						disabled={!device.connected || calibratorPending !== null}
-						class="h-4 w-full accent-[#80499c] disabled:opacity-40"
+						class="h-4 w-30 accent-[#80499c] disabled:opacity-40"
 					/>
 				</div>
 
 				<label
-					class="min-w-0 text-[0.65rem] text-neutral-500 uppercase"
+					class="grid grid-cols-[max-content_4rem] items-center justify-between gap-2 text-[0.65rem] text-neutral-500 uppercase"
 					for={`brightness-number-${device.id}`}
 				>
-					Tgt
+					Target
 
 					<input
 						id={`brightness-number-${device.id}`}
@@ -180,26 +179,24 @@
 							targetBrightness = clampBrightness(targetBrightness);
 						}}
 						disabled={!device.connected || calibratorPending !== null}
-						class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs text-neutral-100 outline-none focus:border-[#80499c] disabled:border-neutral-700 disabled:text-neutral-600"
+						class="border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs text-neutral-100 outline-none focus:border-[#80499c] disabled:border-neutral-700 disabled:text-neutral-600"
 					/>
 				</label>
 			</div>
 
 			<label
-				class="flex cursor-pointer items-center justify-center gap-1.5 border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-[0.65rem]"
+				class="flex min-w-30 cursor-pointer items-center justify-between gap-1.5 border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-[0.65rem]"
 				title="Safety override"
 			>
 				<span class="text-neutral-400 uppercase">Safe</span>
 				<input type="checkbox" bind:checked={safetyOverride} class="h-4 w-4 accent-red-600" />
 			</label>
-		</div>
 
-		<div class="grid grid-cols-4 gap-1.5">
 			<button
 				type="button"
 				disabled={!device.connected || calibratorPending !== null}
 				onclick={() => setCalibrator('on')}
-				class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
 			>
 				{#if calibratorPending === 'on'}
 					setting
@@ -214,7 +211,7 @@
 				type="button"
 				disabled={!device.connected || calibratorPending !== null || calibratorOff}
 				onclick={() => setCalibrator('off')}
-				class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
 			>
 				{calibratorPending === 'off' ? 'stopping' : 'cal off'}
 			</button>
@@ -223,7 +220,7 @@
 				type="button"
 				disabled={!device.connected || coverPending !== null || coverMoving || coverOpen}
 				onclick={() => runCover('open')}
-				class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
 			>
 				{coverPending === 'open' || coverMoving ? 'opening' : 'open'}
 			</button>
@@ -232,12 +229,11 @@
 				type="button"
 				disabled={!device.connected || coverPending !== null || coverMoving || coverClosed}
 				onclick={() => runCover('close')}
-				class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
 			>
 				{coverPending === 'close' || coverMoving ? 'closing' : 'close'}
 			</button>
 		</div>
-
 		{#if error}
 			<p class="border border-red-500 bg-red-950 p-1 font-mono text-xs text-red-100">
 				{error}

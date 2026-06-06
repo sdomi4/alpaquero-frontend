@@ -45,7 +45,7 @@
 </script>
 
 <article
-	class="flex h-full max-h-full flex-col border border-neutral-700 bg-neutral-950 p-1.5 shadow-[2px_2px_0_#80499c]"
+	class="flex h-full max-h-full w-fit justify-self-start flex-col border border-neutral-700 bg-neutral-950 p-1.5 shadow-[2px_2px_0_#80499c]"
 	class:opacity-60={!device.connected}
 >
 	<header class="mb-1.5 flex items-center justify-between gap-2">
@@ -92,7 +92,7 @@
 		</p>
 	{/if}
 
-	<div class="min-h-0 flex-1">
+	<div class="min-h-0 flex-1 overflow-hidden">
 		{@render children?.()}
 	</div>
 </article>

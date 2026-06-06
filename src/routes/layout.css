@@ -1,2 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;500;600;700;800&family=Saira+Extra+Condensed:wght@600&display=swap');
+
+@import 'tailwindcss';
+
+@theme {
+	--font-ui: 'Overpass Mono', monospace;
+	--font-logo: 'Saira Extra Condensed', sans-serif;
+}
+
+html,
+body {
+	font-family: 'Overpass Mono', monospace;
+}
+
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';

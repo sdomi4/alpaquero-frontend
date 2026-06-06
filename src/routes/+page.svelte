@@ -18,7 +18,6 @@
 	import type { ObservatoryAction } from '$lib/api/observatory';
 	import { createCameraDeviceFeeds, createConfiguredCameraFeeds } from '$lib/cameraFeeds.js';
 	import {
-		createControlTabs,
 		getControlDevices,
 		mergeConfiguredDevices
 	} from '$lib/controlModel.js';
@@ -84,7 +83,11 @@
 	let observatoryActionPending = $state<ObservatoryAction | null>(null);
 	let observatoryActionError = $state<string | null>(null);
 
-	const DEVICE_CONTROLS_PER_PAGE = 4;
+	const DEVICE_CONTROL_GAP_PX = 8;
+
+	let controlArea: HTMLDivElement | null = $state(null);
+	let controlAreaWidth = $state(0);
+
 	const OBSERVATORY_ACTIONS: Array<{
 		action: ObservatoryAction;
 		title: string;
@@ -113,12 +116,7 @@
 	const controlDevices = $derived(getControlDevices(mergedDevices) as MergedDevice[]);
 	const switchDevices = $derived(controlDevices.filter((device) => device.type === 'switch'));
 	const controlTabs = $derived(
-		createControlTabs(controlDevices, DEVICE_CONTROLS_PER_PAGE) as Array<{
-			id: string;
-			label: string;
-			devices: MergedDevice[];
-			kind: 'controls' | 'switches';
-		}>
+		createWidthBasedControlTabs(controlDevices, controlAreaWidth)
 	);
 	const activeControlTabModel = $derived(
 		controlTabs.find((tab) => tab.id === activeControlTab) ?? controlTabs[0] ?? null
@@ -135,6 +133,18 @@
 	const observatoryStateMessage = $derived(formatStatusMessages(observatoryStateStatus?.messages));
 	const safetyStatus = $derived(formatSafetyStatus(safetyMonitorDevice));
 	const safetyState = $derived(getSafetyState(safetyMonitorDevice, safetyStatus));
+
+	$effect(() => {
+		if (!controlArea) return;
+
+		const observer = new ResizeObserver(([entry]) => {
+			controlAreaWidth = entry.contentRect.width;
+		});
+
+		observer.observe(controlArea);
+
+		return () => observer.disconnect();
+	});
 
 	$effect(() => {
 		if (!controlTabs.some((tab) => tab.id === activeControlTab)) {
@@ -389,15 +399,72 @@
 	}
 
 	function deviceControlFrameClass(device: MergedDevice) {
-		const base = 'h-40 shrink-0';
+		const base = 'h-40 shrink-0 w-fit';
 
-		if (device.type === 'cover') return `${base} w-fit min-w-[38rem] max-w-[42rem]`;
-		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-[46rem] max-w-[52rem]';
-		if (device.type === 'filterwheel') return `${base} w-fit min-w-[30rem] max-w-[36rem]`;
-		if (device.type === 'dome') return `${base} w-fit min-w-[24rem] max-w-[28rem]`;
-		if (device.type === 'switch') return `${base} w-fit min-w-[42rem] max-w-[64rem]`;
+		if (device.type === 'cover') return `${base} min-w-40 max-w-[42rem]`;
+		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-40 max-w-[52rem]';
+		if (device.type === 'filterwheel') return `${base} min-w-40 max-w-[36rem]`;
+		if (device.type === 'dome') return `${base} min-w-40`;
+		if (device.type === 'switch') return `${base} min-w-40 max-w-[64rem]`;
 
-		return `${base} w-fit min-w-[22rem] max-w-[30rem]`;
+		return `${base} min-w-40 max-w-[30rem]`;
+	}
+
+	function estimatedDeviceControlWidth(device: MergedDevice) {
+		if (device.type === 'dome') return 170;
+		if (device.type === 'cover') return 300;
+		if (device.type === 'filterwheel') return 260;
+		if (device.type === 'switch') return 420;
+		if (device.type === 'telescope') return 720;
+
+		return 240;
+	}
+
+	function createWidthBasedControlTabs(devices: MergedDevice[], availableWidth: number) {
+		if (devices.length === 0) return [];
+
+		const safeWidth = Math.max(availableWidth, 160);
+		const tabs: Array<{
+			id: string;
+			label: string;
+			devices: MergedDevice[];
+			kind: 'controls' | 'switches';
+		}> = [];
+
+		let currentDevices: MergedDevice[] = [];
+		let currentWidth = 0;
+
+		for (const device of devices) {
+			const deviceWidth = estimatedDeviceControlWidth(device);
+			const gapWidth = currentDevices.length > 0 ? DEVICE_CONTROL_GAP_PX : 0;
+			const nextWidth = currentWidth + gapWidth + deviceWidth;
+
+			if (currentDevices.length > 0 && nextWidth > safeWidth) {
+				tabs.push({
+					id: `controls-${tabs.length + 1}`,
+					label: `Page ${tabs.length + 1}`,
+					devices: currentDevices,
+					kind: 'controls'
+				});
+
+				currentDevices = [device];
+				currentWidth = deviceWidth;
+			} else {
+				currentDevices = [...currentDevices, device];
+				currentWidth = nextWidth;
+			}
+		}
+
+		if (currentDevices.length > 0) {
+			tabs.push({
+				id: `controls-${tabs.length + 1}`,
+				label: `Page ${tabs.length + 1}`,
+				devices: currentDevices,
+				kind: 'controls'
+			});
+		}
+
+		return tabs;
 	}
 
 	function observatoryActionLabel(action: ObservatoryAction) {
@@ -493,7 +560,7 @@
 </script>
 
 <svelte:head>
-	<title>Alpaquero / Arriero</title>
+	<title>Alpaquero</title>
 </svelte:head>
 
 <ErrorToast message={latestErrorMessage} onDismiss={dismissErrorToast} />
@@ -516,7 +583,7 @@
 
 		<div class="font-mono text-sm uppercase">
 			<p class="text-[0.65rem] font-black tracking-[0.2em] text-purple-200">Observatory</p>
-			<p class="truncate text-sm font-black">{observatoryName}</p>
+			<p class="truncate text-sm font-black">Sonnenturm Uecht</p>
 		</div>
 
 		<div
@@ -555,7 +622,7 @@
 		</section>
 	{/if}
 
-	<section class="grid min-h-0 gap-2 xl:grid-cols-[minmax(0,3fr)_minmax(24rem,2fr)]">
+	<section class="grid min-h-0 gap-2 xl:grid-cols-[minmax(0,2fr)_minmax(24rem,2fr)]">
 		<CameraFeed feeds={cameraFeeds} />
 
 		<aside class="grid min-h-0 grid-rows-[minmax(0,0.58fr)_minmax(0,1fr)] gap-2">
@@ -664,16 +731,16 @@
 				{/each}
 			</aside>
 
-			<div class="h-full min-h-0 min-w-0">
+			<div class="h-full min-h-0 min-w-0" bind:this={controlArea}>
 				{#if controlDevices.length === 0}
 					<p class="font-mono text-neutral-400">
 						No configured control devices reported by backend.
 					</p>
 				{:else}
-					<div class="h-full min-h-0 overflow-x-auto overflow-y-hidden pr-1 pb-1">
+					<div class="h-full min-h-0 overflow-hidden pr-1 pb-1">
 						<div class="flex h-full min-w-max items-stretch gap-2 pr-2">
 							{#each activeControlDevices as device (device.id)}
-								<div class={deviceControlFrameClass(device) + ' h-full min-h-0'}>
+								<div class={deviceControlFrameClass(device) + ' h-full min-h-0 w-fit flex-none'}>
 									{#if device.type === 'switch'}
 										{@const switchControls = switchControlsForDevice(device)}
 
