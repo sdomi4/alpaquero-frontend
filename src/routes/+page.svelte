@@ -4,9 +4,11 @@
 	import type { PageData } from './$types';
 	import CameraFeed from '$lib/components/CameraFeed.svelte';
 	import ErrorToast from '$lib/components/ErrorToast.svelte';
+	import CameraBlock from '$lib/components/devices/CameraBlock.svelte';
 	import GenericDeviceBlock from '$lib/components/devices/GenericDeviceBlock.svelte';
 	import FilterWheelBlock from '$lib/components/devices/FilterWheelBlock.svelte';
 	import TelescopeBlock from '$lib/components/devices/TelescopeBlock.svelte';
+	import ObservingConditionsBlock from '$lib/components/devices/ObservingConditionsBlock.svelte';
 	import SequencePanel from '$lib/components/sequences/SequencePanel.svelte';
 	import DomeBlock from '$lib/components/devices/DomeBlock.svelte';
 	import CoverBlock from '$lib/components/devices/CoverBlock.svelte';
@@ -17,10 +19,7 @@
 	import { getSwitchControls, runObservatoryAction } from '$lib/api/observatory';
 	import type { ObservatoryAction } from '$lib/api/observatory';
 	import { createCameraDeviceFeeds, createConfiguredCameraFeeds } from '$lib/cameraFeeds.js';
-	import {
-		getControlDevices,
-		mergeConfiguredDevices
-	} from '$lib/controlModel.js';
+	import { getControlDevices, mergeConfiguredDevices } from '$lib/controlModel.js';
 	import { parseObservatoryLogMessage } from '$lib/websocketMessages';
 
 	let { data }: { data: PageData } = $props();
@@ -115,9 +114,7 @@
 	);
 	const controlDevices = $derived(getControlDevices(mergedDevices) as MergedDevice[]);
 	const switchDevices = $derived(controlDevices.filter((device) => device.type === 'switch'));
-	const controlTabs = $derived(
-		createWidthBasedControlTabs(controlDevices, controlAreaWidth)
-	);
+	const controlTabs = $derived(createWidthBasedControlTabs(controlDevices, controlAreaWidth));
 	const activeControlTabModel = $derived(
 		controlTabs.find((tab) => tab.id === activeControlTab) ?? controlTabs[0] ?? null
 	);
@@ -380,27 +377,31 @@
 
 	function renderDevice(device: MergedDevice) {
 		return {
+			CameraBlock,
 			FilterWheelBlock,
 			TelescopeBlock,
 			DomeBlock,
 			CoverBlock,
 			GenericDeviceBlock,
 			component:
-				device.type === 'filterwheel'
-					? FilterWheelBlock
-					: device.type === 'telescope'
-						? TelescopeBlock
-						: device.type === 'dome'
-							? DomeBlock
-							: device.type === 'cover'
-								? CoverBlock
-								: GenericDeviceBlock
+				device.type === 'camera'
+					? CameraBlock
+					: device.type === 'filterwheel'
+						? FilterWheelBlock
+						: device.type === 'telescope'
+							? TelescopeBlock
+							: device.type === 'dome'
+								? DomeBlock
+								: device.type === 'cover'
+									? CoverBlock
+									: GenericDeviceBlock
 		}.component;
 	}
 
 	function deviceControlFrameClass(device: MergedDevice) {
 		const base = 'h-40 shrink-0 w-fit';
 
+		if (device.type === 'camera') return `${base} min-w-40 max-w-[24rem]`;
 		if (device.type === 'cover') return `${base} min-w-40 max-w-[42rem]`;
 		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-40 max-w-[52rem]';
 		if (device.type === 'filterwheel') return `${base} min-w-40 max-w-[36rem]`;
@@ -412,6 +413,7 @@
 
 	function estimatedDeviceControlWidth(device: MergedDevice) {
 		if (device.type === 'dome') return 170;
+		if (device.type === 'camera') return 320;
 		if (device.type === 'cover') return 300;
 		if (device.type === 'filterwheel') return 260;
 		if (device.type === 'switch') return 420;
@@ -632,7 +634,7 @@
 
 			<div class="grid min-h-0 gap-2 2xl:grid-cols-2">
 				{#if observingConditionsDevice}
-					<GenericDeviceBlock
+					<ObservingConditionsBlock
 						device={observingConditionsDevice}
 						onLifecycleComplete={handleLifecycleComplete}
 					/>

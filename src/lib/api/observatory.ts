@@ -1,3 +1,4 @@
+import { buildCameraCommandRequest } from './cameraRequests.js';
 import { buildTelescopeCommandRequest } from './telescopeRequests.js';
 
 const OBSERVATORY_API_BASE = '/api/observatory';
@@ -99,6 +100,44 @@ export async function moveFilterWheel(filterwheelId: string, position: number) {
 	}
 
 	return res.json().catch(() => null);
+}
+
+async function runCameraCommand(
+	cameraId: string,
+	command: 'temperature' | 'capture',
+	options: {
+		targetTemp?: number;
+		exposure?: number;
+		binX?: number;
+		binY?: number;
+		additional_headers?: Record<string, unknown>;
+	}
+) {
+	const request = buildCameraCommandRequest(cameraId, command, options);
+	const res = await fetch(request.path, request.init);
+
+	if (!res.ok) {
+		throw new Error(`Camera ${command} failed: ${res.status} ${res.statusText}`);
+	}
+
+	return res.json().catch(() => null);
+}
+
+export async function setCameraTemperature(cameraId: string, targetTemp: number) {
+	return runCameraCommand(cameraId, 'temperature', { targetTemp });
+}
+
+export async function captureCameraImage(
+	cameraId: string,
+	exposure: number,
+	binX = 1,
+	binY = 1,
+) {
+	return runCameraCommand(cameraId, 'capture', {
+		exposure,
+		binX,
+		binY,
+	});
 }
 
 async function runTelescopeCommand(
