@@ -10,7 +10,7 @@ const OBSERVATORY_API_BASE = '/api/observatory';
  *   exposure?: number;
  *   binX?: number;
  *   binY?: number;
- *   additional_headers?: Record<string, unknown>;
+ *   fileSuffix?: string;
  * }} CameraCommandOptions
  */
 
@@ -37,11 +37,18 @@ export function buildCameraCommandRequest(cameraId, command, options) {
 		};
 	}
 
+	/** @type {{ exposure: number; binX: number; binY: number; file_suffix?: string }} */
 	const payload = {
 		exposure: formatFiniteNumber(options.exposure, 'Camera exposure'),
 		binX: formatPositiveInteger(options.binX ?? 1, 'Camera binX'),
 		binY: formatPositiveInteger(options.binY ?? 1, 'Camera binY')
 	};
+
+	const fileSuffix = options.fileSuffix?.trim();
+
+	if (fileSuffix) {
+		payload.file_suffix = fileSuffix;
+	}
 
 	return {
 		path: `${OBSERVATORY_API_BASE}/camera/${encodedId}/capture`,

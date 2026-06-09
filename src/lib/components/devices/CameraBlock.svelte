@@ -28,6 +28,7 @@
 	let pending = $state<CameraAction | null>(null);
 	let error = $state<string | null>(null);
 	let targetInitialized = $state(false);
+	let fileSuffix = $state('');
 
 	const displayState = $derived(getCameraDisplayState(device.state));
 	const canCommand = $derived(device.connected && pending === null);
@@ -64,7 +65,8 @@
 					device.id,
 					exposure,
 					normalizePositiveInteger(binX),
-					normalizePositiveInteger(binY)
+					normalizePositiveInteger(binY),
+					fileSuffix
 				);
 			}
 		} catch (err) {
@@ -127,7 +129,7 @@
 
 		<div class="grid gap-2 font-mono">
 			<div class="grid gap-2 border border-neutral-700 bg-neutral-900 p-2">
-				<div class="grid grid-cols-3 gap-1.5">
+				<div class="grid grid-cols-4 gap-1.5">
 					<label class="min-w-0">
 						<span class="text-[0.6rem] uppercase text-neutral-400">Exposure s</span>
 						<input
@@ -162,6 +164,24 @@
 							disabled={!device.connected || pending !== null}
 							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 						/>
+					</label>
+					<label class="min-w-0">
+						<span class="text-[0.6rem] uppercase text-neutral-400">Suffix</span>
+						<input
+							type="text"
+							list={`suffix-presets-${device.id}`}
+							placeholder="none"
+							bind:value={fileSuffix}
+							disabled={!device.connected || pending !== null}
+							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+						/>
+
+						<datalist id={`suffix-presets-${device.id}`}>
+							<option value="dark"></option>
+							<option value="flat"></option>
+							<option value="bias"></option>
+							<option value="calib"></option>
+						</datalist>
 					</label>
 				</div>
 

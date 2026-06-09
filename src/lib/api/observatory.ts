@@ -110,7 +110,7 @@ async function runCameraCommand(
 		exposure?: number;
 		binX?: number;
 		binY?: number;
-		additional_headers?: Record<string, unknown>;
+		fileSuffix?: string;
 	}
 ) {
 	const request = buildCameraCommandRequest(cameraId, command, options);
@@ -132,13 +132,15 @@ export async function captureCameraImage(
 	exposure: number,
 	binX = 1,
 	binY = 1,
+	fileSuffix = ''
 ) {
 	return runCameraCommand(cameraId, 'capture', {
 		exposure,
 		binX,
 		binY,
+		fileSuffix
 	});
-}
+}		
 
 async function runTelescopeCommand(
 	telescopeId: string,
