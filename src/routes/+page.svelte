@@ -16,8 +16,9 @@
 	import type { SwitchControl } from '$lib/components/devices/SwitchBlock.svelte';
 	import WebsocketLogger from '$lib/components/WebsocketLogger.svelte';
 	import logo from '$lib/assets/Arriero_Logo_Mono_Clear.svg';
-	import { getSwitchControls, runObservatoryAction } from '$lib/api/observatory';
+	import { getSwitchControls, runObservatoryAction, runSequence } from '$lib/api/observatory';
 	import type { ObservatoryAction } from '$lib/api/observatory';
+	import { runObservatoryControlAction } from '$lib/observatoryControlActions.js';
 	import { createCameraDeviceFeeds, createConfiguredCameraFeeds } from '$lib/cameraFeeds.js';
 	import { getControlDevices, mergeConfiguredDevices } from '$lib/controlModel.js';
 	import { parseObservatoryLogMessage } from '$lib/websocketMessages';
@@ -173,7 +174,7 @@
 		observatoryActionError = null;
 
 		try {
-			await runObservatoryAction(action);
+			await runObservatoryControlAction(action, { runSequence, runObservatoryAction });
 		} catch (err) {
 			observatoryActionError = err instanceof Error ? err.message : 'Observatory action failed';
 		} finally {

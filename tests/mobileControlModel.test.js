@@ -50,7 +50,7 @@ test('mergeConfiguredDevices overlays live device status without losing configur
 	);
 });
 
-test('createMobileControlOptions includes sequences, observatory actions, and every control device', () => {
+test('createMobileControlOptions includes shared status panes and every control device', () => {
 	const devices = [
 		{ id: 'conditions', name: 'Conditions', type: 'observing_conditions' },
 		{ id: 'safety', name: 'Safety', type: 'safety_monitor' },
@@ -62,6 +62,8 @@ test('createMobileControlOptions includes sequences, observatory actions, and ev
 
 	assert.deepEqual(createMobileControlOptions(devices), [
 		{ id: 'sequences', label: 'Sequences', kind: 'sequences' },
+		{ id: 'conditions', label: 'Conditions', kind: 'conditions' },
+		{ id: 'log', label: 'Log', kind: 'log' },
 		{ id: 'observatory-actions', label: 'Observatory Actions', kind: 'observatory-actions' },
 		{ id: 'device:mount', label: 'Mount', kind: 'device', deviceId: 'mount' },
 		{ id: 'device:filter', label: 'Filter Wheel', kind: 'device', deviceId: 'filter' },

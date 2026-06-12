@@ -4,16 +4,20 @@
 	import type { PageData } from './$types';
 	import CameraFeed from '$lib/components/CameraFeed.svelte';
 	import ErrorToast from '$lib/components/ErrorToast.svelte';
+	import CameraBlock from '$lib/components/devices/CameraBlock.svelte';
 	import GenericDeviceBlock from '$lib/components/devices/GenericDeviceBlock.svelte';
 	import FilterWheelBlock from '$lib/components/devices/FilterWheelBlock.svelte';
 	import TelescopeBlock from '$lib/components/devices/TelescopeBlock.svelte';
+	import ObservingConditionsBlock from '$lib/components/devices/ObservingConditionsBlock.svelte';
 	import SequencePanel from '$lib/components/sequences/SequencePanel.svelte';
 	import DomeBlock from '$lib/components/devices/DomeBlock.svelte';
 	import CoverBlock from '$lib/components/devices/CoverBlock.svelte';
 	import SwitchBlock from '$lib/components/devices/SwitchBlock.svelte';
 	import type { SwitchControl } from '$lib/components/devices/SwitchBlock.svelte';
-	import { getSwitchControls, runObservatoryAction } from '$lib/api/observatory';
+	import WebsocketLogger from '$lib/components/WebsocketLogger.svelte';
+	import { getSwitchControls, runObservatoryAction, runSequence } from '$lib/api/observatory';
 	import type { ObservatoryAction } from '$lib/api/observatory';
+	import { runObservatoryControlAction } from '$lib/observatoryControlActions.js';
 	import { createCameraDeviceFeeds, createConfiguredCameraFeeds } from '$lib/cameraFeeds.js';
 	import {
 		createMobileControlOptions,
@@ -67,6 +71,8 @@
 	let liveSequences = $state<Record<string, ActiveSequence>>({});
 	let liveDevices = $state<Record<string, DeviceState>>({});
 	let wsStatus = $state<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
+	let errorWsStatus = $state<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
+	let websocketMessages = $state<LogMessage[]>([]);
 	let latestErrorMessage = $state<LogMessage | null>(null);
 	let websocketMessageCounter = 0;
 	let observatoryName = $state('Observatory');
@@ -100,6 +106,9 @@
 	});
 	const safetyMonitorDevice = $derived(
 		mergedDevices.find((device) => device.type === 'safety_monitor') ?? null
+	);
+	const observingConditionsDevice = $derived(
+		mergedDevices.find((device) => device.type === 'observing_conditions') ?? null
 	);
 	const controlDevices = $derived(getControlDevices(mergedDevices) as MergedDevice[]);
 	const switchDevices = $derived(controlDevices.filter((device) => device.type === 'switch'));
@@ -153,7 +162,7 @@
 		observatoryActionError = null;
 
 		try {
-			await runObservatoryAction(action);
+			await runObservatoryControlAction(action, { runSequence, runObservatoryAction });
 		} catch (err) {
 			observatoryActionError = err instanceof Error ? err.message : 'Observatory action failed';
 		} finally {
@@ -167,6 +176,8 @@
 			...parsed,
 			id: `mobile-errors-ws-${websocketMessageCounter++}`
 		};
+
+		websocketMessages = [message, ...websocketMessages].slice(0, 100);
 
 		if (message.level.toLowerCase() === 'error') {
 			latestErrorMessage = message;
@@ -355,21 +366,24 @@
 
 	function renderDevice(device: MergedDevice) {
 		return {
+			CameraBlock,
 			FilterWheelBlock,
 			TelescopeBlock,
 			DomeBlock,
 			CoverBlock,
 			GenericDeviceBlock,
 			component:
-				device.type === 'filterwheel'
-					? FilterWheelBlock
-					: device.type === 'telescope'
-						? TelescopeBlock
-						: device.type === 'dome'
-							? DomeBlock
-							: device.type === 'cover'
-								? CoverBlock
-								: GenericDeviceBlock
+				device.type === 'camera'
+					? CameraBlock
+					: device.type === 'filterwheel'
+						? FilterWheelBlock
+						: device.type === 'telescope'
+							? TelescopeBlock
+							: device.type === 'dome'
+								? DomeBlock
+								: device.type === 'cover'
+									? CoverBlock
+									: GenericDeviceBlock
 		}.component;
 	}
 
@@ -443,6 +457,18 @@
 		errorWs.onmessage = (event) => {
 			const raw = typeof event.data === 'string' ? event.data : String(event.data);
 			appendWebsocketMessage(raw);
+		};
+
+		errorWs.onopen = () => {
+			errorWsStatus = 'connected';
+		};
+
+		errorWs.onerror = () => {
+			errorWsStatus = 'error';
+		};
+
+		errorWs.onclose = () => {
+			errorWsStatus = 'disconnected';
 		};
 
 		return () => {
@@ -533,6 +559,33 @@
 			<div class="min-h-0 flex-1 overflow-y-auto pr-1">
 				{#if selectedControl?.kind === 'sequences'}
 					<SequencePanel availableSequences={data.sequences} activeSequences={liveSequences} />
+				{:else if selectedControl?.kind === 'conditions'}
+					<div class="h-full min-h-[10rem]">
+						{#if observingConditionsDevice}
+							<ObservingConditionsBlock
+								device={observingConditionsDevice}
+								onLifecycleComplete={handleLifecycleComplete}
+							/>
+						{:else}
+							<section
+								class="h-full border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
+							>
+								<div class="mb-2 border-b-2 border-neutral-700 pb-2">
+									<h2 class="text-lg font-black uppercase">Conditions</h2>
+								</div>
+
+								<p
+									class="border border-dashed border-neutral-700 p-2 font-mono text-xs text-neutral-500"
+								>
+									No observing conditions device configured.
+								</p>
+							</section>
+						{/if}
+					</div>
+				{:else if selectedControl?.kind === 'log'}
+					<div class="h-full min-h-[10rem]">
+						<WebsocketLogger messages={websocketMessages} status={errorWsStatus} />
+					</div>
 				{:else if selectedControl?.kind === 'observatory-actions'}
 					<section class="grid h-full min-h-[10rem] content-start gap-2">
 						<div class="grid grid-cols-3 gap-2" aria-label="Observatory controls">

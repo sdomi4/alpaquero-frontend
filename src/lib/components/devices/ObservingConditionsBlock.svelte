@@ -70,7 +70,7 @@
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
 	<div class="grid h-full grid-rows-[auto_minmax(0,1fr)] gap-2">
-		<div class="grid grid-cols-4 gap-1.5 font-mono">
+		<div class="grid grid-cols-2 gap-1.5 font-mono sm:grid-cols-4">
 			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Ambient</p>
 				<p class="truncate text-base leading-none font-black">
@@ -100,7 +100,7 @@
 			</div>
 		</div>
 
-		<div class="grid min-h-0 grid-cols-[minmax(12rem,0.9fr)_minmax(0,1fr)] gap-2">
+		<div class="grid min-h-0 grid-cols-1 gap-2 md:grid-cols-[minmax(12rem,0.9fr)_minmax(0,1fr)]">
 			<div class="grid content-start gap-1.5 font-mono">
 				<div
 					class="border bg-neutral-900 p-2"
