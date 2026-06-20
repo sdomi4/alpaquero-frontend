@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import DeviceShell from './DeviceShell.svelte';
 	import { captureCameraImage, setCameraTemperature } from '$lib/api/observatory';
 	import { getCameraDisplayState } from '$lib/cameraState.js';
@@ -29,10 +30,22 @@
 	let error = $state<string | null>(null);
 	let targetInitialized = $state(false);
 	let fileSuffix = $state('');
+	let nowMs = $state(Date.now());
 
 	const displayState = $derived(getCameraDisplayState(device.state));
 	const canCommand = $derived(device.connected && pending === null);
-	const progressPercent = $derived(displayState.percentCompleted ?? 0);
+
+	const exposureStartTimeUtc = $derived(readString(device.state?.last_exposure_start_time));
+	const exposureDuration = $derived(readNumber(device.state?.last_exposure_duration));
+
+	const backendProgressPercent = $derived(readNumber(device.state?.percent_completed));
+	const calculatedProgressPercent = $derived(
+		calculateExposurePercent(exposureStartTimeUtc, exposureDuration)
+	);
+
+	const progressPercent = $derived(
+		backendProgressPercent ?? displayState.percentCompleted ?? calculatedProgressPercent ?? 0
+	);
 
 	function formatNumber(value: number | null, digits = 1) {
 		return value === null ? '--' : value.toFixed(digits);
@@ -47,8 +60,65 @@
 		return value ? trueLabel : falseLabel;
 	}
 
+	function formatDuration(value: number | null) {
+		if (value === null) return '--';
+		return `${value.toFixed(value < 10 ? 1 : 0)}s`;
+	}
+
+	function formatUtcTime(value: string | null) {
+		const ms = parseUtcMs(value);
+
+		if (ms === null) return '--';
+
+		return new Date(ms).toLocaleTimeString([], {
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit'
+		});
+	}
+
 	function normalizePositiveInteger(value: number) {
 		return Math.max(1, Math.round(Number.isFinite(value) ? value : 1));
+	}
+
+	function readNumber(...values: unknown[]) {
+		for (const value of values) {
+			if (typeof value === 'number' && Number.isFinite(value)) return value;
+			if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) {
+				return Number(value);
+			}
+		}
+
+		return null;
+	}
+
+	function readString(...values: unknown[]) {
+		for (const value of values) {
+			if (typeof value === 'string' && value.trim() !== '') return value;
+		}
+
+		return null;
+	}
+
+	function parseUtcMs(value: string | null) {
+		if (!value) return null;
+
+		const hasTimezone = value.endsWith('Z') || /[+-]\d\d:?\d\d$/.test(value);
+		const normalized = hasTimezone ? value : `${value}Z`;
+		const parsed = Date.parse(normalized);
+
+		return Number.isFinite(parsed) ? parsed : null;
+	}
+
+	function calculateExposurePercent(startTimeUtc: string | null, durationSeconds: number | null) {
+		const startMs = parseUtcMs(startTimeUtc);
+
+		if (startMs === null || durationSeconds === null || durationSeconds <= 0) return null;
+
+		const elapsedMs = nowMs - startMs;
+		const durationMs = durationSeconds * 1000;
+
+		return Math.max(0, Math.min(100, (elapsedMs / durationMs) * 100));
 	}
 
 	async function run(action: CameraAction) {
@@ -75,6 +145,14 @@
 			pending = null;
 		}
 	}
+
+	onMount(() => {
+		const interval = window.setInterval(() => {
+			nowMs = Date.now();
+		}, 250);
+
+		return () => window.clearInterval(interval);
+	});
 
 	$effect(() => {
 		if (targetInitialized || displayState.targetTemperature === null) return;
@@ -122,7 +200,7 @@
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] uppercase text-neutral-400">Done</p>
 				<p class="truncate text-sm font-black leading-none">
-					{formatPercent(displayState.percentCompleted)}
+					{formatPercent(progressPercent)}
 				</p>
 			</div>
 		</div>
@@ -165,6 +243,7 @@
 							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 						/>
 					</label>
+
 					<label class="min-w-0">
 						<span class="text-[0.6rem] uppercase text-neutral-400">Suffix</span>
 						<input
@@ -221,11 +300,16 @@
 				<div class="grid content-center gap-1 border border-neutral-700 bg-neutral-900 p-2">
 					<div class="flex items-center justify-between gap-2 font-mono">
 						<span class="text-[0.6rem] uppercase text-neutral-400">Progress</span>
-						<span class="text-xs font-black">{formatPercent(displayState.percentCompleted)}</span>
+						<span class="text-xs font-black">{formatPercent(progressPercent)}</span>
 					</div>
 
 					<div class="h-3 border border-neutral-700 bg-neutral-950">
 						<div class="h-full bg-[#80499c]" style:width={`${progressPercent}%`}></div>
+					</div>
+
+					<div class="flex items-center justify-between gap-2 text-[0.6rem] uppercase text-neutral-500">
+						<span>last {formatUtcTime(exposureStartTimeUtc)}</span>
+						<span>dur {formatDuration(exposureDuration)}</span>
 					</div>
 				</div>
 			</div>
