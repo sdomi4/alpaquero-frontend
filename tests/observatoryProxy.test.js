@@ -64,3 +64,39 @@ test('proxyObservatoryRequest forwards method, headers, and body to the backend'
 	]);
 	assert.deepEqual(await response.json(), { forwarded: true });
 });
+
+test('proxyObservatoryRequest lets fetch calculate content length for forwarded bodies', async () => {
+	/** @type {Array<Record<string, string>>} */
+	const forwardedHeaders = [];
+	const request = new Request('http://frontend.test/api/observatory/observatory/sequences/parse', {
+		method: 'POST',
+		headers: {
+			'content-length': '999',
+			'content-type': 'multipart/form-data; boundary=----manual-sequence-upload'
+		},
+		body:
+			'------manual-sequence-upload\r\n' +
+			'content-disposition: form-data; name="file"; filename="sequence.yaml"\r\n' +
+			'content-type: application/yaml\r\n\r\n' +
+			'name: test\r\n' +
+			'------manual-sequence-upload--\r\n'
+	});
+
+	await proxyObservatoryRequest({
+		apiBase: 'http://backend.test',
+		path: 'observatory/sequences/parse',
+		request,
+		/** @type {typeof globalThis.fetch} */
+		fetch: async (_url, init) => {
+			forwardedHeaders.push(Object.fromEntries(new Headers(init?.headers)));
+
+			return new Response(null, { status: 204 });
+		}
+	});
+
+	assert.equal(forwardedHeaders[0]['content-length'], undefined);
+	assert.equal(
+		forwardedHeaders[0]['content-type'],
+		'multipart/form-data; boundary=----manual-sequence-upload'
+	);
+});

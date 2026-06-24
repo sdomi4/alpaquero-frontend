@@ -11,12 +11,13 @@ const HOP_BY_HOP_HEADERS = new Set([
 
 /**
  * @param {Headers} headers
+ * @param {Set<string>} [omittedHeaders]
  */
-function copyHeaders(headers) {
+function copyHeaders(headers, omittedHeaders = HOP_BY_HOP_HEADERS) {
 	const copied = new Headers();
 
 	for (const [name, value] of headers) {
-		if (HOP_BY_HOP_HEADERS.has(name.toLowerCase())) continue;
+		if (omittedHeaders.has(name.toLowerCase())) continue;
 		copied.set(name, value);
 	}
 
@@ -49,10 +50,11 @@ export async function proxyObservatoryRequest({ apiBase, path, request, fetch })
 	const sourceUrl = new URL(request.url);
 	const method = request.method.toUpperCase();
 	const hasBody = method !== 'GET' && method !== 'HEAD';
+	const requestHeaders = new Set([...HOP_BY_HOP_HEADERS, 'content-length']);
 
 	const backendResponse = await fetch(buildBackendUrl(apiBase, path, sourceUrl.search), {
 		method,
-		headers: copyHeaders(request.headers),
+		headers: copyHeaders(request.headers, requestHeaders),
 		body: hasBody ? await request.arrayBuffer() : undefined
 	});
 
