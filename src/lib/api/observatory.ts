@@ -244,12 +244,16 @@ export async function abortSequence(contextId: string) {
 }
 
 export async function uploadSequence(file: File, dryRun = false) {
-	const form = new FormData();
-	form.append('file', file);
-
 	const res = await fetch(`${OBSERVATORY_API_BASE}/observatory/sequences/parse?dry_run=${dryRun}`, {
 		method: 'POST',
-		body: form
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			filename: file.name,
+			contentType: file.type || 'application/x-yaml',
+			content: await file.text()
+		})
 	});
 
 	if (!res.ok) {

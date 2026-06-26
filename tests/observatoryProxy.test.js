@@ -100,3 +100,42 @@ test('proxyObservatoryRequest lets fetch calculate content length for forwarded 
 		'multipart/form-data; boundary=----manual-sequence-upload'
 	);
 });
+
+test('proxyObservatoryRequest converts browser sequence upload JSON to backend multipart', async () => {
+	/** @type {Array<{ url: string; headers: Record<string, string>; body: string }>} */
+	const calls = [];
+	const request = new Request(
+		'http://10.44.0.1/api/observatory/observatory/sequences/parse?dry_run=false',
+		{
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json'
+			},
+			body: JSON.stringify({
+				filename: 'sequence.yaml',
+				content: 'name: test\n'
+			})
+		}
+	);
+
+	await proxyObservatoryRequest({
+		apiBase: 'http://localhost:8000',
+		path: 'observatory/sequences/parse',
+		request,
+		/** @type {typeof globalThis.fetch} */
+		fetch: async (url, init) => {
+			calls.push({
+				url: String(url),
+				headers: Object.fromEntries(new Headers(init?.headers)),
+				body: await new Response(init?.body).text()
+			});
+
+			return new Response(null, { status: 204 });
+		}
+	});
+
+	assert.equal(calls[0].url, 'http://localhost:8000/observatory/sequences/parse?dry_run=false');
+	assert.equal(calls[0].headers['content-type'], undefined);
+	assert.match(calls[0].body, /name="file"; filename="sequence.yaml"/);
+	assert.match(calls[0].body, /name: test/);
+});
