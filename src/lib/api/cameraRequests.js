@@ -11,6 +11,7 @@ const OBSERVATORY_API_BASE = '/api/observatory';
  *   binX?: number;
  *   binY?: number;
  *   fileSuffix?: string;
+ *   additional_headers?: Record<string, string>;
  * }} CameraCommandOptions
  */
 

@@ -611,11 +611,18 @@
 			<p class="mt-1 truncate text-base leading-none font-black">{safetyStatus}</p>
 		</div>
 
-		<div
-			class="justify-self-start border border-[#80499c] bg-[#211428] px-3 py-1.5 font-mono text-xs text-purple-100 uppercase lg:justify-self-end"
+		<nav
+			class="flex flex-wrap gap-2 justify-self-start font-mono text-xs uppercase lg:justify-self-end"
 		>
-			User menu
-		</div>
+			<a
+				href="/pinpoint"
+				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 transition-transform hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px]"
+			>
+				Pinpoint
+			</a>
+
+			<div class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100">User menu</div>
+		</nav>
 	</header>
 
 	{#if data.error}
