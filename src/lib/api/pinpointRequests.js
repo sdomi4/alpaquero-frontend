@@ -1,5 +1,5 @@
 const OBSERVATORY_API_BASE = '/api/observatory';
-const PINPOINT_PATHS = ['observatory/pinpoint', 'pinpoint'];
+const PINPOINT_PATH = 'astro/pinpoint';
 
 export const DEFAULT_PINPOINT_TIMEOUT_MS = 6 * 60 * 60 * 1000;
 export const DEFAULT_PINPOINT_GLOB = '*.fits';
@@ -112,27 +112,23 @@ export async function runPinpointSolver(
 	let lastBody = null;
 
 	try {
-		for (const path of PINPOINT_PATHS) {
-			const response = await fetch(`${OBSERVATORY_API_BASE}/${path}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(payload),
-				signal: controller.signal
-			});
+		const response = await fetch(`${OBSERVATORY_API_BASE}/${PINPOINT_PATH}`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(payload),
+			signal: controller.signal
+		});
 
-			const body = await readResponse(response);
+		const body = await readResponse(response);
 
-			if (response.ok) {
-				return body;
-			}
-
-			lastResponse = response;
-			lastBody = body;
-
-			if (response.status !== 404) break;
+		if (response.ok) {
+			return body;
 		}
+
+		lastResponse = response;
+		lastBody = body;
 	} catch (error) {
 		if (error instanceof DOMException && error.name === 'AbortError') {
 			throw new Error('Pinpoint solver timed out');
