@@ -9,6 +9,7 @@ const DEVICE_ENDPOINTS: Record<string, string> = {
 	camera: 'camera',
 	cover: 'cover',
 	filterwheel: 'filterwheel',
+	focuser: 'focuser',
 	switch: 'switch',
 	observing_conditions: 'conditions',
 	safety_monitor: 'safety'
@@ -102,6 +103,31 @@ export async function moveFilterWheel(filterwheelId: string, position: number) {
 	return res.json().catch(() => null);
 }
 
+async function runFocuserCommand(focuserId: string, path: string, errorLabel: string) {
+	const res = await fetch(
+		`${OBSERVATORY_API_BASE}/focuser/${encodeURIComponent(focuserId)}/${path}`,
+		{ method: 'POST' }
+	);
+
+	if (!res.ok) {
+		throw new Error(`${errorLabel} failed: ${res.status} ${res.statusText}`);
+	}
+
+	return res.json().catch(() => null);
+}
+
+export async function moveFocuser(focuserId: string, position: number) {
+	return runFocuserCommand(focuserId, `move/${position}`, 'Focuser move');
+}
+
+export async function nudgeFocuser(focuserId: string, increment: number) {
+	return runFocuserCommand(focuserId, `move_increment/${increment}`, 'Focuser nudge');
+}
+
+export async function stopFocuser(focuserId: string) {
+	return runFocuserCommand(focuserId, 'stop', 'Focuser stop');
+}
+
 async function runCameraCommand(
 	cameraId: string,
 	command: 'temperature' | 'capture',
@@ -140,7 +166,7 @@ export async function captureCameraImage(
 		binY,
 		fileSuffix
 	});
-}		
+}
 
 async function runTelescopeCommand(
 	telescopeId: string,

@@ -7,6 +7,7 @@
 	import CameraBlock from '$lib/components/devices/CameraBlock.svelte';
 	import GenericDeviceBlock from '$lib/components/devices/GenericDeviceBlock.svelte';
 	import FilterWheelBlock from '$lib/components/devices/FilterWheelBlock.svelte';
+	import FocuserBlock from '$lib/components/devices/FocuserBlock.svelte';
 	import TelescopeBlock from '$lib/components/devices/TelescopeBlock.svelte';
 	import ObservingConditionsBlock from '$lib/components/devices/ObservingConditionsBlock.svelte';
 	import SequencePanel from '$lib/components/sequences/SequencePanel.svelte';
@@ -50,6 +51,12 @@
 		status: string;
 	};
 
+	type Instrument = {
+		id: string;
+		name: string;
+		devices: Array<Record<string, string>>;
+	};
+
 	type LogMessage = {
 		id: string;
 		level: string;
@@ -73,6 +80,7 @@
 	let websocketMessages = $state<LogMessage[]>([]);
 	let latestErrorMessage = $state<LogMessage | null>(null);
 	let websocketMessageCounter = 0;
+	let stateMessageValues: Record<string, string> = {};
 	let observatoryName = $state('Observatory');
 	let backendObservatoryStatus = $state('');
 	let observatoryStateStatus = $state<ObservatoryStateStatus | null>(null);
@@ -115,7 +123,9 @@
 	);
 	const controlDevices = $derived(getControlDevices(mergedDevices) as MergedDevice[]);
 	const switchDevices = $derived(controlDevices.filter((device) => device.type === 'switch'));
-	const controlTabs = $derived(createWidthBasedControlTabs(controlDevices, controlAreaWidth));
+	const controlTabs = $derived(
+		createInstrumentControlTabs(controlDevices, data.instruments as Instrument[], controlAreaWidth)
+	);
 	const activeControlTabModel = $derived(
 		controlTabs.find((tab) => tab.id === activeControlTab) ?? controlTabs[0] ?? null
 	);
@@ -128,7 +138,6 @@
 				: '') ||
 			wsStatus
 	);
-	const observatoryStateMessage = $derived(formatStatusMessages(observatoryStateStatus?.messages));
 	const safetyStatus = $derived(formatSafetyStatus(safetyMonitorDevice));
 	const safetyState = $derived(getSafetyState(safetyMonitorDevice, safetyStatus));
 
@@ -193,6 +202,32 @@
 
 		if (message.level.toLowerCase() === 'error') {
 			latestErrorMessage = message;
+		}
+	}
+
+	function appendStateMessages(messages: Record<string, unknown> | undefined) {
+		const nextValues: Record<string, string> = {};
+		const receivedAt = new Date().toISOString();
+		const entries: LogMessage[] = [];
+
+		for (const [source, value] of Object.entries(messages ?? {})) {
+			const text = formatStatusMessageValue(value);
+			nextValues[source] = text;
+			if (stateMessageValues[source] === text) continue;
+
+			entries.push({
+				id: `state-ws-${websocketMessageCounter++}`,
+				level: 'info',
+				message: `${source}: ${text}`,
+				timestamp: receivedAt,
+				receivedAt,
+				raw: JSON.stringify({ source, message: value })
+			});
+		}
+
+		stateMessageValues = nextValues;
+		if (entries.length > 0) {
+			websocketMessages = [...entries.reverse(), ...websocketMessages].slice(0, 100);
 		}
 	}
 
@@ -312,14 +347,6 @@
 		return '';
 	}
 
-	function formatStatusMessages(messages: Record<string, unknown> | undefined): string {
-		const entries = Object.entries(messages ?? {});
-
-		if (entries.length === 0) return 'no messages';
-
-		return entries.map(([key, value]) => `${key}: ${formatStatusMessageValue(value)}`).join(' | ');
-	}
-
 	function formatStatusMessageValue(value: unknown): string {
 		if (value === null) return 'null';
 		if (value === undefined) return 'unknown';
@@ -380,6 +407,7 @@
 		return {
 			CameraBlock,
 			FilterWheelBlock,
+			FocuserBlock,
 			TelescopeBlock,
 			DomeBlock,
 			CoverBlock,
@@ -389,13 +417,15 @@
 					? CameraBlock
 					: device.type === 'filterwheel'
 						? FilterWheelBlock
-						: device.type === 'telescope'
-							? TelescopeBlock
-							: device.type === 'dome'
-								? DomeBlock
-								: device.type === 'cover'
-									? CoverBlock
-									: GenericDeviceBlock
+						: device.type === 'focuser'
+							? FocuserBlock
+							: device.type === 'telescope'
+								? TelescopeBlock
+								: device.type === 'dome'
+									? DomeBlock
+									: device.type === 'cover'
+										? CoverBlock
+										: GenericDeviceBlock
 		}.component;
 	}
 
@@ -406,6 +436,7 @@
 		if (device.type === 'cover') return `${base} min-w-40 max-w-[42rem]`;
 		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-40 max-w-[52rem]';
 		if (device.type === 'filterwheel') return `${base} min-w-40 max-w-[36rem]`;
+		if (device.type === 'focuser') return `${base} min-w-[28rem] max-w-[36rem]`;
 		if (device.type === 'dome') return `${base} min-w-40`;
 		if (device.type === 'switch') return `${base} min-w-40 max-w-[64rem]`;
 
@@ -417,13 +448,19 @@
 		if (device.type === 'camera') return 320;
 		if (device.type === 'cover') return 300;
 		if (device.type === 'filterwheel') return 260;
+		if (device.type === 'focuser') return 460;
 		if (device.type === 'switch') return 420;
 		if (device.type === 'telescope') return 720;
 
 		return 240;
 	}
 
-	function createWidthBasedControlTabs(devices: MergedDevice[], availableWidth: number) {
+	function createWidthBasedControlTabs(
+		devices: MergedDevice[],
+		availableWidth: number,
+		labelPrefix = 'Page',
+		idPrefix = 'controls'
+	) {
 		if (devices.length === 0) return [];
 
 		const safeWidth = Math.max(availableWidth, 160);
@@ -444,8 +481,8 @@
 
 			if (currentDevices.length > 0 && nextWidth > safeWidth) {
 				tabs.push({
-					id: `controls-${tabs.length + 1}`,
-					label: `Page ${tabs.length + 1}`,
+					id: `${idPrefix}-${tabs.length + 1}`,
+					label: `${labelPrefix} ${tabs.length + 1}`,
 					devices: currentDevices,
 					kind: 'controls'
 				});
@@ -460,14 +497,59 @@
 
 		if (currentDevices.length > 0) {
 			tabs.push({
-				id: `controls-${tabs.length + 1}`,
-				label: `Page ${tabs.length + 1}`,
+				id: `${idPrefix}-${tabs.length + 1}`,
+				label: `${labelPrefix} ${tabs.length + 1}`,
 				devices: currentDevices,
 				kind: 'controls'
 			});
 		}
 
 		return tabs;
+	}
+
+	function createInstrumentControlTabs(
+		devices: MergedDevice[],
+		instruments: Instrument[],
+		availableWidth: number
+	) {
+		const assignedDeviceKeys = new Set<string>();
+		const instrumentTabs = instruments.flatMap((instrument, index) => {
+			const instrumentDeviceKeys = new Set(
+				(instrument.devices ?? []).flatMap((entry) =>
+					Object.entries(entry).map(([type, id]) => `${type}:${id}`)
+				)
+			);
+
+			for (const key of instrumentDeviceKeys) assignedDeviceKeys.add(key);
+
+			const instrumentName = instrument.name || instrument.id || `Instrument ${index + 1}`;
+			const instrumentId = instrument.id || String(index + 1);
+			const instrumentDevices = devices.filter((device) =>
+				instrumentDeviceKeys.has(`${device.type}:${device.id}`)
+			);
+			const pages = createWidthBasedControlTabs(
+				instrumentDevices,
+				availableWidth,
+				instrumentName,
+				`instrument-${instrumentId}`
+			);
+
+			if (pages.length === 1) pages[0].label = instrumentName;
+
+			return pages;
+		});
+
+		const unassignedDevices = devices.filter(
+			(device) => !assignedDeviceKeys.has(`${device.type}:${device.id}`)
+		);
+		const unassignedTabs = createWidthBasedControlTabs(
+			unassignedDevices,
+			availableWidth,
+			'Other',
+			'unassigned'
+		);
+
+		return [...instrumentTabs, ...unassignedTabs];
 	}
 
 	function observatoryActionLabel(action: ObservatoryAction) {
@@ -498,6 +580,7 @@
 						? (payload.status as ObservatoryStateStatus)
 						: null;
 				observatoryStateStatus = stateStatus;
+				appendStateMessages(stateStatus?.messages);
 				backendObservatoryStatus = firstStringValue(payload, [
 					'observatory_status',
 					'overall_status',
@@ -711,9 +794,6 @@
 					{observatoryStatus}
 				</span>
 
-				<span class="max-w-72 truncate text-neutral-400">
-					{observatoryStateMessage}
-				</span>
 			</div>
 		</div>
 
@@ -747,7 +827,7 @@
 						No configured control devices reported by backend.
 					</p>
 				{:else}
-					<div class="h-full min-h-0 overflow-hidden pr-1 pb-1">
+					<div class="h-full min-h-0 overflow-x-auto overflow-y-hidden pr-1 pb-1">
 						<div class="flex h-full min-w-max items-stretch gap-2 pr-2">
 							{#each activeControlDevices as device (device.id)}
 								<div class={deviceControlFrameClass(device) + ' h-full min-h-0 w-fit flex-none'}>

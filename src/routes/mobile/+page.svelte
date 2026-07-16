@@ -7,6 +7,7 @@
 	import CameraBlock from '$lib/components/devices/CameraBlock.svelte';
 	import GenericDeviceBlock from '$lib/components/devices/GenericDeviceBlock.svelte';
 	import FilterWheelBlock from '$lib/components/devices/FilterWheelBlock.svelte';
+	import FocuserBlock from '$lib/components/devices/FocuserBlock.svelte';
 	import TelescopeBlock from '$lib/components/devices/TelescopeBlock.svelte';
 	import ObservingConditionsBlock from '$lib/components/devices/ObservingConditionsBlock.svelte';
 	import SequencePanel from '$lib/components/sequences/SequencePanel.svelte';
@@ -75,6 +76,7 @@
 	let websocketMessages = $state<LogMessage[]>([]);
 	let latestErrorMessage = $state<LogMessage | null>(null);
 	let websocketMessageCounter = 0;
+	let stateMessageValues: Record<string, string> = {};
 	let observatoryName = $state('Observatory');
 	let backendObservatoryStatus = $state('');
 	let observatoryStateStatus = $state<ObservatoryStateStatus | null>(null);
@@ -128,7 +130,6 @@
 				: '') ||
 			wsStatus
 	);
-	const observatoryStateMessage = $derived(formatStatusMessages(observatoryStateStatus?.messages));
 	const safetyStatus = $derived(formatSafetyStatus(safetyMonitorDevice));
 	const safetyState = $derived(getSafetyState(safetyMonitorDevice, safetyStatus));
 
@@ -181,6 +182,32 @@
 
 		if (message.level.toLowerCase() === 'error') {
 			latestErrorMessage = message;
+		}
+	}
+
+	function appendStateMessages(messages: Record<string, unknown> | undefined) {
+		const nextValues: Record<string, string> = {};
+		const receivedAt = new Date().toISOString();
+		const entries: LogMessage[] = [];
+
+		for (const [source, value] of Object.entries(messages ?? {})) {
+			const text = formatStatusMessageValue(value);
+			nextValues[source] = text;
+			if (stateMessageValues[source] === text) continue;
+
+			entries.push({
+				id: `state-ws-${websocketMessageCounter++}`,
+				level: 'info',
+				message: `${source}: ${text}`,
+				timestamp: receivedAt,
+				receivedAt,
+				raw: JSON.stringify({ source, message: value })
+			});
+		}
+
+		stateMessageValues = nextValues;
+		if (entries.length > 0) {
+			websocketMessages = [...entries.reverse(), ...websocketMessages].slice(0, 100);
 		}
 	}
 
@@ -300,14 +327,6 @@
 		return '';
 	}
 
-	function formatStatusMessages(messages: Record<string, unknown> | undefined): string {
-		const entries = Object.entries(messages ?? {});
-
-		if (entries.length === 0) return 'no messages';
-
-		return entries.map(([key, value]) => `${key}: ${formatStatusMessageValue(value)}`).join(' | ');
-	}
-
 	function formatStatusMessageValue(value: unknown): string {
 		if (value === null) return 'null';
 		if (value === undefined) return 'unknown';
@@ -368,6 +387,7 @@
 		return {
 			CameraBlock,
 			FilterWheelBlock,
+			FocuserBlock,
 			TelescopeBlock,
 			DomeBlock,
 			CoverBlock,
@@ -377,13 +397,15 @@
 					? CameraBlock
 					: device.type === 'filterwheel'
 						? FilterWheelBlock
-						: device.type === 'telescope'
-							? TelescopeBlock
-							: device.type === 'dome'
-								? DomeBlock
-								: device.type === 'cover'
-									? CoverBlock
-									: GenericDeviceBlock
+						: device.type === 'focuser'
+							? FocuserBlock
+							: device.type === 'telescope'
+								? TelescopeBlock
+								: device.type === 'dome'
+									? DomeBlock
+									: device.type === 'cover'
+										? CoverBlock
+										: GenericDeviceBlock
 		}.component;
 	}
 
@@ -414,6 +436,7 @@
 						? (payload.status as ObservatoryStateStatus)
 						: null;
 				observatoryStateStatus = stateStatus;
+				appendStateMessages(stateStatus?.messages);
 				backendObservatoryStatus = firstStringValue(payload, [
 					'observatory_status',
 					'overall_status',
@@ -532,9 +555,6 @@
 				<div class="flex min-w-0 items-center justify-between gap-2">
 					<h2 class="text-base leading-none font-black uppercase">Control</h2>
 
-					<span class="truncate font-mono text-[0.65rem] text-neutral-400 uppercase">
-						{observatoryStateMessage}
-					</span>
 				</div>
 
 				<select
