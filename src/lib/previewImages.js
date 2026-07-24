@@ -29,7 +29,7 @@ function buildPreviewSrc(value, mimeType) {
 	if (trimmed.startsWith('data:')) return trimmed;
 
 	const cleanMimeType =
-		typeof mimeType === 'string' && mimeType.trim() ? mimeType.trim() : 'image/jpeg';
+		typeof mimeType === 'string' && mimeType.trim() ? mimeType.trim() : 'image/png';
 
 	return `data:${cleanMimeType};base64,${trimmed}`;
 }
@@ -49,7 +49,7 @@ export function normalizeCapturePreviews(payload, limit = 3) {
 
 		const record = /** @type {Record<string, unknown>} */ (item);
 		const name = typeof record.name === 'string' ? record.name.trim() : '';
-		const src = buildPreviewSrc(record.preview_jpg, record.mime_type);
+		const src = buildPreviewSrc(record.preview_png, record.mime_type);
 
 		if (!name || !src) continue;
 
