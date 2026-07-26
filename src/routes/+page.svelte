@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 	import { PUBLIC_WS_BASE } from '$env/static/public';
 	import type { PageData } from './$types';
 	import CameraFeed from '$lib/components/CameraFeed.svelte';
@@ -698,7 +699,14 @@
 			class="flex flex-wrap gap-2 justify-self-start font-mono text-xs uppercase lg:justify-self-end"
 		>
 			<a
-				href="/pinpoint"
+				href={resolve('/sequences/new')}
+				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 transition-transform hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px]"
+			>
+				Builder
+			</a>
+
+			<a
+				href={resolve('/pinpoint')}
 				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 transition-transform hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px]"
 			>
 				Pinpoint
@@ -793,7 +801,6 @@
 				<span class="shrink-0 border border-[#80499c] bg-[#211428] px-2 py-1 text-purple-100">
 					{observatoryStatus}
 				</span>
-
 			</div>
 		</div>
 

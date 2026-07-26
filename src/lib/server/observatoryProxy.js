@@ -9,7 +9,7 @@ const HOP_BY_HOP_HEADERS = new Set([
 	'upgrade'
 ]);
 
-const SEQUENCE_PARSE_PATH = 'observatory/sequences/parse';
+const SEQUENCE_PARSE_PATH = 'sequences/parse';
 
 /**
  * @param {Headers} headers
@@ -59,9 +59,8 @@ function buildSequenceUploadForm(payload) {
 		throw new Error('Sequence upload payload must be an object');
 	}
 
-	const { filename, content, contentType } = /** @type {{ filename?: unknown; content?: unknown; contentType?: unknown }} */ (
-		payload
-	);
+	const { filename, content, contentType } =
+		/** @type {{ filename?: unknown; content?: unknown; contentType?: unknown }} */ (payload);
 
 	if (typeof filename !== 'string' || !filename || typeof content !== 'string') {
 		throw new Error('Sequence upload payload requires filename and content');

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import {
 		abortSequence,
 		listSequences,
@@ -21,11 +22,8 @@
 
 	let { availableSequences, activeSequences }: Props = $props();
 
-	let localSequences = $state<string[]>([]);
-
-	$effect(() => {
-		localSequences = normalizeSequences(availableSequences);
-	});
+	let refreshedSequences = $state<string[] | null>(null);
+	const localSequences = $derived(refreshedSequences ?? normalizeSequences(availableSequences));
 	let pending = $state<string | null>(null);
 	let error = $state<string | null>(null);
 	let uploadResult = $state<string | null>(null);
@@ -52,8 +50,12 @@
 		return [];
 	}
 
+	function sequenceEditorHref(sequence: string) {
+		return `${resolve('/sequences/new')}?sequence=${encodeURIComponent(sequence)}`;
+	}
+
 	async function refreshSequences() {
-		localSequences = normalizeSequences(await listSequences());
+		refreshedSequences = normalizeSequences(await listSequences());
 	}
 
 	async function start(sequence: string) {
@@ -126,13 +128,21 @@
 	<div class="mb-1.5 flex items-center justify-between gap-3 border-b-2 border-neutral-700 pb-1.5">
 		<h2 class="text-base leading-none font-black uppercase">Sequences</h2>
 
-		<button
-			type="button"
-			onclick={() => uploadDialog?.showModal()}
-			class="border border-[#80499c] bg-neutral-800 px-2 py-0.5 font-mono text-[0.65rem] font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-		>
-			upload
-		</button>
+		<div class="flex items-center gap-1">
+			<a
+				href={resolve('/sequences/new')}
+				class="border border-[#80499c] bg-[#211428] px-2 py-0.5 font-mono text-[0.65rem] font-black text-purple-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+			>
+				new
+			</a>
+			<button
+				type="button"
+				onclick={() => uploadDialog?.showModal()}
+				class="border border-[#80499c] bg-neutral-800 px-2 py-0.5 font-mono text-[0.65rem] font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+			>
+				upload
+			</button>
+		</div>
 	</div>
 
 	<div class="grid min-h-0 flex-1 gap-1.5 overflow-y-auto pr-1">
@@ -151,14 +161,23 @@
 						>
 							<span class="truncate font-mono text-xs">{sequence}</span>
 
-							<button
-								type="button"
-								disabled={pending === `start:${sequence}`}
-								onclick={() => start(sequence)}
-								class="border border-neutral-500 bg-neutral-800 px-2 py-0.5 font-mono text-[0.65rem] font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:text-neutral-500 disabled:shadow-none"
-							>
-								{pending === `start:${sequence}` ? 'starting' : 'start'}
-							</button>
+							<div class="flex shrink-0 items-center gap-1">
+								<a
+									href={sequenceEditorHref(sequence)}
+									aria-label={`Edit sequence ${sequence}`}
+									class="border border-sky-700 bg-sky-950 px-2 py-0.5 font-mono text-[0.65rem] font-black text-sky-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-sky-900 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+								>
+									edit
+								</a>
+								<button
+									type="button"
+									disabled={pending === `start:${sequence}`}
+									onclick={() => start(sequence)}
+									class="border border-neutral-500 bg-neutral-800 px-2 py-0.5 font-mono text-[0.65rem] font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:text-neutral-500 disabled:shadow-none"
+								>
+									{pending === `start:${sequence}` ? 'starting' : 'start'}
+								</button>
+							</div>
 						</div>
 					{/each}
 				</div>

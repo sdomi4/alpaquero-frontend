@@ -207,7 +207,7 @@ export async function slewTelescopeToSun(telescopeId: string, safetyOverride = f
 
 export async function runSequence(sequenceName: string) {
 	const res = await fetch(
-		`${OBSERVATORY_API_BASE}/observatory/sequences/${encodeURIComponent(sequenceName)}/run`,
+		`${OBSERVATORY_API_BASE}/sequences/${encodeURIComponent(sequenceName)}/run`,
 		{
 			method: 'POST',
 			headers: {
@@ -226,7 +226,7 @@ export async function runSequence(sequenceName: string) {
 
 export async function pauseSequence(contextId: string) {
 	const res = await fetch(
-		`${OBSERVATORY_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/pause`,
+		`${OBSERVATORY_API_BASE}/sequences/${encodeURIComponent(contextId)}/pause`,
 		{
 			method: 'POST'
 		}
@@ -241,7 +241,7 @@ export async function pauseSequence(contextId: string) {
 
 export async function resumeSequence(contextId: string) {
 	const res = await fetch(
-		`${OBSERVATORY_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/resume`,
+		`${OBSERVATORY_API_BASE}/sequences/${encodeURIComponent(contextId)}/resume`,
 		{
 			method: 'POST'
 		}
@@ -256,7 +256,7 @@ export async function resumeSequence(contextId: string) {
 
 export async function abortSequence(contextId: string) {
 	const res = await fetch(
-		`${OBSERVATORY_API_BASE}/observatory/sequences/${encodeURIComponent(contextId)}/abort`,
+		`${OBSERVATORY_API_BASE}/sequences/${encodeURIComponent(contextId)}/abort`,
 		{
 			method: 'POST'
 		}
@@ -269,34 +269,81 @@ export async function abortSequence(contextId: string) {
 	return res.json().catch(() => null);
 }
 
-export async function uploadSequence(file: File, dryRun = false) {
-	const res = await fetch(`${OBSERVATORY_API_BASE}/observatory/sequences/parse?dry_run=${dryRun}`, {
+async function sequenceResponseError(response: Response, operation: string) {
+	const payload = await response
+		.clone()
+		.json()
+		.catch(() => null);
+	const detail =
+		payload && typeof payload === 'object' && 'detail' in payload ? String(payload.detail) : null;
+	return new Error(
+		`${operation} failed: ${detail ?? `${response.status} ${response.statusText}`.trim()}`
+	);
+}
+
+export async function uploadSequenceYaml(
+	filename: string,
+	content: string,
+	dryRun = false,
+	save = false
+) {
+	const search = new URLSearchParams({
+		dry_run: String(dryRun),
+		save: String(save)
+	});
+	const res = await fetch(`${OBSERVATORY_API_BASE}/sequences/parse?${search}`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			filename: file.name,
-			contentType: file.type || 'application/x-yaml',
-			content: await file.text()
+			filename,
+			contentType: 'application/x-yaml',
+			content
 		})
 	});
 
 	if (!res.ok) {
-		throw new Error(`Sequence upload failed: ${res.status} ${res.statusText}`);
+		throw await sequenceResponseError(res, dryRun ? 'Sequence validation' : 'Sequence save');
 	}
 
 	return res.json().catch(() => null);
 }
 
+export async function uploadSequence(file: File, dryRun = false, save = false) {
+	return uploadSequenceYaml(file.name, await file.text(), dryRun, save);
+}
+
+export async function getSequenceYaml(sequenceName: string) {
+	const res = await fetch(`${OBSERVATORY_API_BASE}/sequences/${encodeURIComponent(sequenceName)}`);
+
+	if (!res.ok) {
+		throw await sequenceResponseError(res, 'Sequence load');
+	}
+
+	return res.text();
+}
+
 export async function listSequences() {
-	const res = await fetch(`${OBSERVATORY_API_BASE}/observatory/sequences`);
+	const res = await fetch(`${OBSERVATORY_API_BASE}/sequences`);
 
 	if (!res.ok) {
 		throw new Error(`Sequence list failed: ${res.status} ${res.statusText}`);
 	}
 
 	return res.json();
+}
+
+export async function refreshSequenceCatalog() {
+	const res = await fetch(`${OBSERVATORY_API_BASE}/sequences/refresh`, {
+		method: 'POST'
+	});
+
+	if (!res.ok) {
+		throw await sequenceResponseError(res, 'Sequence catalog refresh');
+	}
+
+	return res.json().catch(() => null);
 }
 
 export async function openDome(domeId: string, safetyOverride = false) {

@@ -1,0 +1,21 @@
+name: 'frontend_feature_probe'
+description: 'Backend dry-run coverage for the structured editor'
+await: '{{ conditions.weather_is_safe() }}'
+await_timeout: 60
+update: true
+sequence:
+  - action: debug_timestamp
+    register: timestamp
+
+  - action: debug_print
+    args:
+      message: 'Timestamp result: {{ timestamp.result }}'
+    when: '{{ args.enabled }}'
+
+  - name: 'Repeat until dark'
+    sequence:
+      - action: debug_sleep
+        args:
+          seconds: 1
+    repeat: 2
+    until: '{{ conditions.is_dark(conditions_id=args.conditions_id) }}'

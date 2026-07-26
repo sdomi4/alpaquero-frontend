@@ -68,7 +68,7 @@ test('proxyObservatoryRequest forwards method, headers, and body to the backend'
 test('proxyObservatoryRequest lets fetch calculate content length for forwarded bodies', async () => {
 	/** @type {Array<Record<string, string>>} */
 	const forwardedHeaders = [];
-	const request = new Request('http://frontend.test/api/observatory/observatory/sequences/parse', {
+	const request = new Request('http://frontend.test/api/observatory/sequences/parse', {
 		method: 'POST',
 		headers: {
 			'content-length': '999',
@@ -84,7 +84,7 @@ test('proxyObservatoryRequest lets fetch calculate content length for forwarded 
 
 	await proxyObservatoryRequest({
 		apiBase: 'http://backend.test',
-		path: 'observatory/sequences/parse',
+		path: 'sequences/parse',
 		request,
 		/** @type {typeof globalThis.fetch} */
 		fetch: async (_url, init) => {
@@ -104,23 +104,20 @@ test('proxyObservatoryRequest lets fetch calculate content length for forwarded 
 test('proxyObservatoryRequest converts browser sequence upload JSON to backend multipart', async () => {
 	/** @type {Array<{ url: string; headers: Record<string, string>; body: string }>} */
 	const calls = [];
-	const request = new Request(
-		'http://10.44.0.1/api/observatory/observatory/sequences/parse?dry_run=false',
-		{
-			method: 'POST',
-			headers: {
-				'content-type': 'application/json'
-			},
-			body: JSON.stringify({
-				filename: 'sequence.yaml',
-				content: 'name: test\n'
-			})
-		}
-	);
+	const request = new Request('http://10.44.0.1/api/observatory/sequences/parse?dry_run=false', {
+		method: 'POST',
+		headers: {
+			'content-type': 'application/json'
+		},
+		body: JSON.stringify({
+			filename: 'sequence.yaml',
+			content: 'name: test\n'
+		})
+	});
 
 	await proxyObservatoryRequest({
 		apiBase: 'http://localhost:8000',
-		path: 'observatory/sequences/parse',
+		path: 'sequences/parse',
 		request,
 		/** @type {typeof globalThis.fetch} */
 		fetch: async (url, init) => {
@@ -134,7 +131,7 @@ test('proxyObservatoryRequest converts browser sequence upload JSON to backend m
 		}
 	});
 
-	assert.equal(calls[0].url, 'http://localhost:8000/observatory/sequences/parse?dry_run=false');
+	assert.equal(calls[0].url, 'http://localhost:8000/sequences/parse?dry_run=false');
 	assert.equal(calls[0].headers['content-type'], undefined);
 	assert.match(calls[0].body, /name="file"; filename="sequence.yaml"/);
 	assert.match(calls[0].body, /name: test/);

@@ -17,7 +17,7 @@ function backendUrl(path: string) {
 export const load: PageServerLoad = async ({ fetch }) => {
 	const [devicesRes, sequencesRes, camerasRes] = await Promise.all([
 		fetch(backendUrl('observatory/devices')),
-		fetch(backendUrl('observatory/sequences')),
+		fetch(backendUrl('sequences')),
 		fetch(backendUrl('observatory/cameras'))
 	]);
 
