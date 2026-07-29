@@ -10,6 +10,8 @@
 	import FocuserBlock from '$lib/components/devices/FocuserBlock.svelte';
 	import TelescopeBlock from '$lib/components/devices/TelescopeBlock.svelte';
 	import ObservingConditionsBlock from '$lib/components/devices/ObservingConditionsBlock.svelte';
+	import RunningSequences from '$lib/components/header/RunningSequences.svelte';
+	import StatusDisplay from '$lib/components/header/StatusDisplay.svelte';
 	import SequencePanel from '$lib/components/sequences/SequencePanel.svelte';
 	import DomeBlock from '$lib/components/devices/DomeBlock.svelte';
 	import CoverBlock from '$lib/components/devices/CoverBlock.svelte';
@@ -52,6 +54,7 @@
 		context_id: string;
 		sequence_name: string;
 		status: string;
+		info: string | null;
 	};
 
 	type LogMessage = {
@@ -511,17 +514,14 @@
 	class="grid h-dvh grid-rows-[auto_minmax(0,1fr)] gap-2 overflow-hidden bg-neutral-950 p-2 text-neutral-100"
 >
 	<header
-		class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-2 border-neutral-700 bg-neutral-900 p-2 text-neutral-100 shadow-[4px_4px_0_#80499c]"
+		class="grid grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)_auto] items-center gap-2 border-2 border-neutral-700 bg-neutral-900 p-2 text-neutral-100 shadow-[4px_4px_0_#80499c]"
 	>
-		<div
-			class="min-w-0 border border-[#80499c] bg-[#211428] px-2 py-1.5 font-mono text-xs text-purple-100 uppercase"
-		>
-			<p class="text-[0.6rem] leading-none font-black tracking-[0.16em]">Status</p>
-			<p class="mt-1 truncate text-sm leading-none font-black">{observatoryStatus}</p>
+		<div class="min-w-0 overflow-hidden">
+			<StatusDisplay status={observatoryStatus} />
 		</div>
 
 		<div
-			class="max-w-[8.5rem] min-w-0 border-2 px-2 py-1.5 font-mono text-xs uppercase shadow-[2px_2px_0_#80499c]"
+			class="min-w-0 border-2 px-2 py-1.5 font-mono text-xs uppercase shadow-[2px_2px_0_#80499c]"
 			class:border-emerald-300={safetyState === 'safe'}
 			class:bg-emerald-950={safetyState === 'safe'}
 			class:text-emerald-100={safetyState === 'safe'}
@@ -537,7 +537,7 @@
 		</div>
 
 		<div
-			class="border border-[#80499c] bg-[#211428] px-2 py-1.5 font-mono text-[0.65rem] text-purple-100 uppercase"
+			class="justify-self-end border border-[#80499c] bg-[#211428] px-2 py-1.5 font-mono text-[0.65rem] text-purple-100 uppercase"
 		>
 			User
 		</div>
@@ -554,7 +554,6 @@
 			<div class="mb-2 grid shrink-0 gap-2 border-b-2 border-neutral-700 pb-2">
 				<div class="flex min-w-0 items-center justify-between gap-2">
 					<h2 class="text-base leading-none font-black uppercase">Control</h2>
-
 				</div>
 
 				<select
@@ -578,29 +577,31 @@
 
 			<div class="min-h-0 flex-1 overflow-y-auto pr-1">
 				{#if selectedControl?.kind === 'sequences'}
-					<SequencePanel availableSequences={data.sequences} activeSequences={liveSequences} />
+					<SequencePanel availableSequences={data.sequences} />
 				{:else if selectedControl?.kind === 'conditions'}
-					<div class="h-full min-h-[10rem]">
-						{#if observingConditionsDevice}
-							<ObservingConditionsBlock
-								device={observingConditionsDevice}
-								onLifecycleComplete={handleLifecycleComplete}
-							/>
-						{:else}
-							<section
-								class="h-full border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
-							>
-								<div class="mb-2 border-b-2 border-neutral-700 pb-2">
-									<h2 class="text-lg font-black uppercase">Conditions</h2>
-								</div>
-
-								<p
-									class="border border-dashed border-neutral-700 p-2 font-mono text-xs text-neutral-500"
+					<div class="h-full min-h-[10rem] min-w-0 overflow-auto">
+						<div class="h-full w-fit min-w-full">
+							{#if observingConditionsDevice}
+								<ObservingConditionsBlock
+									device={observingConditionsDevice}
+									onLifecycleComplete={handleLifecycleComplete}
+								/>
+							{:else}
+								<section
+									class="h-full min-w-full border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
 								>
-									No observing conditions device configured.
-								</p>
-							</section>
-						{/if}
+									<div class="mb-2 border-b-2 border-neutral-700 pb-2">
+										<h2 class="text-lg font-black uppercase">Conditions</h2>
+									</div>
+
+									<p
+										class="border border-dashed border-neutral-700 p-2 font-mono text-xs text-neutral-500"
+									>
+										No observing conditions device configured.
+									</p>
+								</section>
+							{/if}
+						</div>
 					</div>
 				{:else if selectedControl?.kind === 'log'}
 					<div class="h-full min-h-[10rem]">
@@ -638,30 +639,48 @@
 								{observatoryActionError}
 							</p>
 						{/if}
+
+						<div class="grid min-w-0 gap-1.5 border-t border-neutral-700 pt-2">
+							<h3 class="font-mono text-xs font-black text-neutral-300 uppercase">
+								Sequence status
+							</h3>
+
+							{#if Object.keys(liveSequences).length > 0}
+								<RunningSequences sequences={liveSequences} />
+							{:else}
+								<p
+									class="border border-dashed border-neutral-700 p-2 font-mono text-xs text-neutral-500"
+								>
+									No active sequences.
+								</p>
+							{/if}
+						</div>
 					</section>
 				{:else if selectedDevice}
-					<div class="h-full min-h-[10rem]">
-						{#if selectedDevice.type === 'switch'}
-							{@const switchControls = switchControlsForDevice(selectedDevice)}
+					<div class="h-full min-h-[10rem] min-w-0 overflow-auto">
+						<div class="h-full w-fit min-w-full">
+							{#if selectedDevice.type === 'switch'}
+								{@const switchControls = switchControlsForDevice(selectedDevice)}
 
-							<SwitchBlock
-								device={selectedDevice}
-								controls={switchControls}
-								controlsLoading={switchControls.length === 0 &&
-									switchControlsLoadingForDevice(selectedDevice)}
-								controlsError={switchControls.length === 0
-									? switchControlsErrorForDevice(selectedDevice)
-									: null}
-								onLifecycleComplete={handleLifecycleComplete}
-							/>
-						{:else}
-							{@const DeviceComponent = renderDevice(selectedDevice)}
+								<SwitchBlock
+									device={selectedDevice}
+									controls={switchControls}
+									controlsLoading={switchControls.length === 0 &&
+										switchControlsLoadingForDevice(selectedDevice)}
+									controlsError={switchControls.length === 0
+										? switchControlsErrorForDevice(selectedDevice)
+										: null}
+									onLifecycleComplete={handleLifecycleComplete}
+								/>
+							{:else}
+								{@const DeviceComponent = renderDevice(selectedDevice)}
 
-							<DeviceComponent
-								device={selectedDevice}
-								onLifecycleComplete={handleLifecycleComplete}
-							/>
-						{/if}
+								<DeviceComponent
+									device={selectedDevice}
+									onLifecycleComplete={handleLifecycleComplete}
+								/>
+							{/if}
+						</div>
 					</div>
 				{:else}
 					<p class="border border-dashed border-neutral-700 p-2 font-mono text-xs text-neutral-500">

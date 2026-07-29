@@ -11,6 +11,8 @@
 	import FocuserBlock from '$lib/components/devices/FocuserBlock.svelte';
 	import TelescopeBlock from '$lib/components/devices/TelescopeBlock.svelte';
 	import ObservingConditionsBlock from '$lib/components/devices/ObservingConditionsBlock.svelte';
+	import RunningSequences from '$lib/components/header/RunningSequences.svelte';
+	import StatusDisplay from '$lib/components/header/StatusDisplay.svelte';
 	import SequencePanel from '$lib/components/sequences/SequencePanel.svelte';
 	import DomeBlock from '$lib/components/devices/DomeBlock.svelte';
 	import CoverBlock from '$lib/components/devices/CoverBlock.svelte';
@@ -50,6 +52,7 @@
 		context_id: string;
 		sequence_name: string;
 		status: string;
+		info: string | null;
 	};
 
 	type Instrument = {
@@ -656,7 +659,7 @@
 	class="grid h-screen grid-rows-[auto_minmax(0,1fr)_minmax(14.5rem,0.64fr)] gap-2 overflow-hidden bg-neutral-950 p-2 text-neutral-100"
 >
 	<header
-		class="grid gap-3 border-2 border-neutral-700 bg-neutral-900 p-2 text-neutral-100 shadow-[4px_4px_0_#80499c] lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr] lg:items-center"
+		class="grid gap-3 border-2 border-neutral-700 bg-neutral-900 p-2 text-neutral-100 shadow-[4px_4px_0_#80499c] lg:grid-cols-[1.1fr_0.8fr_minmax(20rem,1.5fr)_auto_auto] lg:items-center"
 	>
 		<div class="flex items-center gap-3">
 			<img src={logo} alt="" class="h-10 w-10 object-contain" />
@@ -673,10 +676,9 @@
 			<p class="truncate text-sm font-black">Sonnenturm Uecht</p>
 		</div>
 
-		<div
-			class="justify-self-center border border-[#80499c] bg-[#211428] px-3 py-1.5 font-mono text-xs text-purple-100 uppercase"
-		>
-			{observatoryStatus}
+		<div class="flex min-w-0 items-stretch gap-2 overflow-hidden">
+			<StatusDisplay status={observatoryStatus} />
+			<RunningSequences sequences={liveSequences} />
 		</div>
 
 		<div
@@ -728,7 +730,7 @@
 
 		<aside class="grid min-h-0 grid-rows-[minmax(0,0.58fr)_minmax(0,1fr)] gap-2">
 			<section class="min-h-0">
-				<SequencePanel availableSequences={data.sequences} activeSequences={liveSequences} />
+				<SequencePanel availableSequences={data.sequences} />
 			</section>
 
 			<div class="grid min-h-0 gap-2 2xl:grid-cols-2">
