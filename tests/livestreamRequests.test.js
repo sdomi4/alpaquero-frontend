@@ -29,7 +29,7 @@ test('listLivestreams requests and normalizes the livestream catalog', async () 
 	});
 
 	assert.deepEqual(names, ['preview']);
-	assert.deepEqual(calls, [{ url: '/api/observatory/livestreams', init: undefined }]);
+	assert.deepEqual(calls, [{ url: '/api/observatory/observatory/livestreams', init: undefined }]);
 });
 
 test('listLivestreams preserves a null catalog so controls can remain hidden', async () => {
@@ -60,11 +60,11 @@ test('livestream actions encode names and post to start and stop routes', async 
 	assert.deepEqual(await stopLivestream('dome preview', fetcher), { running: false });
 	assert.deepEqual(calls, [
 		{
-			url: '/api/observatory/livestreams/dome%20preview/start',
+			url: '/api/observatory/observatory/livestreams/dome%20preview/start',
 			init: { method: 'POST' }
 		},
 		{
-			url: '/api/observatory/livestreams/dome%20preview/stop',
+			url: '/api/observatory/observatory/livestreams/dome%20preview/stop',
 			init: { method: 'POST' }
 		}
 	]);

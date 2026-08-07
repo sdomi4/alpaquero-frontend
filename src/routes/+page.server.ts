@@ -28,7 +28,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		fetch(backendUrl('sequences')),
 		fetch(backendUrl('observatory/cameras')),
 		fetch(backendUrl('observatory/instruments')),
-		fetch(backendUrl('livestreams'))
+		fetch(backendUrl('observatory/livestreams'))
 	]);
 
 	return {

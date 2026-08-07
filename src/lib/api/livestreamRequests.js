@@ -1,4 +1,4 @@
-const LIVESTREAM_API_BASE = '/api/observatory/livestreams';
+const LIVESTREAM_API_BASE = '/api/observatory/observatory/livestreams';
 
 /**
  * @param {unknown} payload

@@ -46,8 +46,8 @@ test('mobile exposes livestreams through the standard control selector', () => {
 });
 
 test('both pages preload livestream availability so null catalogs omit the control', () => {
-	assert.match(mainPageServer, /fetch\(backendUrl\('livestreams'\)\)/);
-	assert.match(mobilePageServer, /fetch\(backendUrl\('livestreams'\)\)/);
+	assert.match(mainPageServer, /fetch\(backendUrl\('observatory\/livestreams'\)\)/);
+	assert.match(mobilePageServer, /fetch\(backendUrl\('observatory\/livestreams'\)\)/);
 	assert.match(mainPage, /data\.livestreams !== null/);
 	assert.match(mobilePage, /data\.livestreams !== null/);
 	assert.match(livestreamControls, /\{#if livestreams !== null\}/);
