@@ -33,7 +33,7 @@ const CONTROL_DEVICE_EXCLUDED_TYPES = new Set(['observing_conditions', 'safety_m
  * @typedef {{
  *   id: string;
  *   label: string;
- *   kind: 'sequences' | 'conditions' | 'log' | 'observatory-actions' | 'device';
+ *   kind: 'sequences' | 'conditions' | 'log' | 'observatory-actions' | 'livestreams' | 'device';
  *   deviceId?: string;
  * }} MobileControlOption
  */
@@ -105,14 +105,24 @@ export function createControlTabs(controlDevices, controlsPerPage = 4) {
 
 /**
  * @param {MergedDevice[] | ConfiguredDevice[]} devices
+ * @param {boolean} [includeLivestreams]
  * @returns {MobileControlOption[]}
  */
-export function createMobileControlOptions(devices) {
+export function createMobileControlOptions(devices, includeLivestreams = false) {
 	return [
 		{ id: 'sequences', label: 'Sequences', kind: 'sequences' },
 		{ id: 'conditions', label: 'Conditions', kind: 'conditions' },
 		{ id: 'log', label: 'Log', kind: 'log' },
 		{ id: 'observatory-actions', label: 'Observatory Actions', kind: 'observatory-actions' },
+		...(includeLivestreams
+			? [
+					/** @type {MobileControlOption} */ ({
+						id: 'livestreams',
+						label: 'Livestreams',
+						kind: 'livestreams'
+					})
+				]
+			: []),
 		...getControlDevices(devices).map(
 			(device) =>
 				/** @type {MobileControlOption} */ ({

@@ -20,6 +20,17 @@ test('mobile page uses the shared camera, observing conditions, and logger compo
 		mobilePage,
 		/import WebsocketLogger from '\$lib\/components\/WebsocketLogger\.svelte';/
 	);
+	assert.match(
+		mobilePage,
+		/import LivestreamControls from '\$lib\/components\/LivestreamControls\.svelte';/
+	);
+	assert.match(
+		mobilePage,
+		/createMobileControlOptions\(controlDevices, livestreamControlsAvailable\)/
+	);
+	assert.match(mobilePage, /selectedControl\?\.kind === 'livestreams'/);
+	assert.match(mobilePage, /<LivestreamControls[\s\S]*initialLivestreams=\{data\.livestreams\}/);
+	assert.match(mobilePage, /<CameraFeed feeds=\{cameraFeeds\}\s*\/>/);
 	assert.match(mobilePage, /device\.type === 'camera'\s*\?\s*CameraBlock/);
 	assert.match(mobilePage, /<ObservingConditionsBlock/);
 	assert.match(

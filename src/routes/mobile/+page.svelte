@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { PUBLIC_WS_BASE } from '$env/static/public';
 	import type { PageData } from './$types';
 	import CameraFeed from '$lib/components/CameraFeed.svelte';
+	import LivestreamControls from '$lib/components/LivestreamControls.svelte';
 	import ErrorToast from '$lib/components/ErrorToast.svelte';
 	import CameraBlock from '$lib/components/devices/CameraBlock.svelte';
 	import GenericDeviceBlock from '$lib/components/devices/GenericDeviceBlock.svelte';
@@ -89,6 +90,7 @@
 	let switchControlErrors = $state<Record<string, string | null>>({});
 	let observatoryActionPending = $state<ObservatoryAction | null>(null);
 	let observatoryActionError = $state<string | null>(null);
+	let livestreamControlsAvailable = $state(untrack(() => data.livestreams !== null));
 
 	const OBSERVATORY_ACTIONS: Array<{
 		action: ObservatoryAction;
@@ -117,7 +119,9 @@
 	);
 	const controlDevices = $derived(getControlDevices(mergedDevices) as MergedDevice[]);
 	const switchDevices = $derived(controlDevices.filter((device) => device.type === 'switch'));
-	const controlOptions = $derived(createMobileControlOptions(controlDevices));
+	const controlOptions = $derived(
+		createMobileControlOptions(controlDevices, livestreamControlsAvailable)
+	);
 	const selectedControl = $derived(
 		controlOptions.find((option) => option.id === selectedControlId) ?? controlOptions[0] ?? null
 	);
@@ -656,6 +660,17 @@
 							{/if}
 						</div>
 					</section>
+				{:else if selectedControl?.kind === 'livestreams'}
+					<div class="h-full min-h-[10rem] min-w-0 overflow-auto">
+						<div class="h-full w-full min-w-72">
+							<LivestreamControls
+								initialLivestreams={data.livestreams}
+								onAvailabilityChange={(available) => {
+									livestreamControlsAvailable = available;
+								}}
+							/>
+						</div>
+					</div>
 				{:else if selectedDevice}
 					<div class="h-full min-h-[10rem] min-w-0 overflow-auto">
 						<div class="h-full w-fit min-w-full">

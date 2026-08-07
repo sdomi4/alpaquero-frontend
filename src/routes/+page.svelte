@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { PUBLIC_WS_BASE } from '$env/static/public';
 	import type { PageData } from './$types';
 	import CameraFeed from '$lib/components/CameraFeed.svelte';
+	import LivestreamControls from '$lib/components/LivestreamControls.svelte';
 	import ErrorToast from '$lib/components/ErrorToast.svelte';
 	import CameraBlock from '$lib/components/devices/CameraBlock.svelte';
 	import GenericDeviceBlock from '$lib/components/devices/GenericDeviceBlock.svelte';
@@ -94,6 +95,7 @@
 	let switchControlErrors = $state<Record<string, string | null>>({});
 	let observatoryActionPending = $state<ObservatoryAction | null>(null);
 	let observatoryActionError = $state<string | null>(null);
+	let livestreamControlsAvailable = $state(untrack(() => data.livestreams !== null));
 
 	const DEVICE_CONTROL_GAP_PX = 8;
 
@@ -126,9 +128,28 @@
 		mergedDevices.find((device) => device.type === 'safety_monitor') ?? null
 	);
 	const controlDevices = $derived(getControlDevices(mergedDevices) as MergedDevice[]);
+	const displayedControlDevices = $derived(
+		livestreamControlsAvailable
+			? [
+					...controlDevices,
+					{
+						id: '__livestreams__',
+						type: 'livestream',
+						name: 'Livestreams',
+						connected: true,
+						status: 'unknown',
+						state: null
+					} satisfies MergedDevice
+				]
+			: controlDevices
+	);
 	const switchDevices = $derived(controlDevices.filter((device) => device.type === 'switch'));
 	const controlTabs = $derived(
-		createInstrumentControlTabs(controlDevices, data.instruments as Instrument[], controlAreaWidth)
+		createInstrumentControlTabs(
+			displayedControlDevices,
+			data.instruments as Instrument[],
+			controlAreaWidth
+		)
 	);
 	const activeControlTabModel = $derived(
 		controlTabs.find((tab) => tab.id === activeControlTab) ?? controlTabs[0] ?? null
@@ -436,6 +457,7 @@
 	function deviceControlFrameClass(device: MergedDevice) {
 		const base = 'h-40 shrink-0 w-fit';
 
+		if (device.type === 'livestream') return `${base} min-w-72 max-w-[32rem]`;
 		if (device.type === 'camera') return `${base} min-w-40 max-w-[24rem]`;
 		if (device.type === 'cover') return `${base} min-w-40 max-w-[42rem]`;
 		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-40 max-w-[52rem]';
@@ -448,6 +470,7 @@
 	}
 
 	function estimatedDeviceControlWidth(device: MergedDevice) {
+		if (device.type === 'livestream') return 320;
 		if (device.type === 'dome') return 170;
 		if (device.type === 'camera') return 320;
 		if (device.type === 'cover') return 300;
@@ -831,7 +854,7 @@
 			</aside>
 
 			<div class="h-full min-h-0 min-w-0" bind:this={controlArea}>
-				{#if controlDevices.length === 0}
+				{#if displayedControlDevices.length === 0}
 					<p class="font-mono text-neutral-400">
 						No configured control devices reported by backend.
 					</p>
@@ -840,7 +863,14 @@
 						<div class="flex h-full min-w-max items-stretch gap-2 pr-2">
 							{#each activeControlDevices as device (device.id)}
 								<div class={deviceControlFrameClass(device) + ' h-full min-h-0 w-fit flex-none'}>
-									{#if device.type === 'switch'}
+									{#if device.type === 'livestream'}
+										<LivestreamControls
+											initialLivestreams={data.livestreams}
+											onAvailabilityChange={(available) => {
+												livestreamControlsAvailable = available;
+											}}
+										/>
+									{:else if device.type === 'switch'}
 										{@const switchControls = switchControlsForDevice(device)}
 
 										<SwitchBlock

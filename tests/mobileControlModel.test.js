@@ -60,11 +60,12 @@ test('createMobileControlOptions includes shared status panes and every control 
 		{ id: 'power', name: 'Power Box', type: 'switch' }
 	];
 
-	assert.deepEqual(createMobileControlOptions(devices), [
+	assert.deepEqual(createMobileControlOptions(devices, true), [
 		{ id: 'sequences', label: 'Sequences', kind: 'sequences' },
 		{ id: 'conditions', label: 'Conditions', kind: 'conditions' },
 		{ id: 'log', label: 'Log', kind: 'log' },
 		{ id: 'observatory-actions', label: 'Observatory Actions', kind: 'observatory-actions' },
+		{ id: 'livestreams', label: 'Livestreams', kind: 'livestreams' },
 		{ id: 'device:mount', label: 'Mount', kind: 'device', deviceId: 'mount' },
 		{ id: 'device:filter', label: 'Filter Wheel', kind: 'device', deviceId: 'filter' },
 		{ id: 'device:flat', label: 'Flat Panel', kind: 'device', deviceId: 'flat' },
