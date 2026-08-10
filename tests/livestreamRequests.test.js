@@ -2,10 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+	getLivestreamCameraSettings,
 	listLivestreams,
 	normalizeLivestreamNames,
 	startLivestream,
-	stopLivestream
+	stopLivestream,
+	updateLivestreamCameraSettings
 } from '../src/lib/api/livestreamRequests.js';
 
 test('normalizeLivestreamNames reads configured names from the backend mapping', () => {
@@ -66,6 +68,41 @@ test('livestream actions encode names and post to start and stop routes', async 
 		{
 			url: '/api/observatory/observatory/livestreams/dome%20preview/stop',
 			init: { method: 'POST' }
+		}
+	]);
+});
+
+test('livestream camera settings use the prefixed GET and PATCH routes', async () => {
+	/** @type {Array<{ url: string; init: RequestInit | undefined }>} */
+	const calls = [];
+	/** @type {typeof globalThis.fetch} */
+	const fetcher = async (url, init) => {
+		calls.push({ url: String(url), init });
+		return new Response(JSON.stringify({ controls: { exposure: 1000, gain: 120 } }), {
+			status: 200,
+			headers: { 'content-type': 'application/json' }
+		});
+	};
+
+	assert.deepEqual(await getLivestreamCameraSettings('dome preview', fetcher), {
+		controls: { exposure: 1000, gain: 120 }
+	});
+	assert.deepEqual(
+		await updateLivestreamCameraSettings('dome preview', { controls: { exposure: 2500 } }, fetcher),
+		{ controls: { exposure: 1000, gain: 120 } }
+	);
+	assert.deepEqual(calls, [
+		{
+			url: '/api/observatory/observatory/livestreams/dome%20preview/camera',
+			init: undefined
+		},
+		{
+			url: '/api/observatory/observatory/livestreams/dome%20preview/camera',
+			init: {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ controls: { exposure: 2500 } })
+			}
 		}
 	]);
 });

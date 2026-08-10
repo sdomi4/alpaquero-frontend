@@ -457,7 +457,7 @@
 	function deviceControlFrameClass(device: MergedDevice) {
 		const base = 'h-40 shrink-0 w-fit';
 
-		if (device.type === 'livestream') return `${base} min-w-72 max-w-[32rem]`;
+		if (device.type === 'livestream') return `${base} min-w-[28rem] max-w-[36rem]`;
 		if (device.type === 'camera') return `${base} min-w-40 max-w-[24rem]`;
 		if (device.type === 'cover') return `${base} min-w-40 max-w-[42rem]`;
 		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-40 max-w-[52rem]';
@@ -470,7 +470,7 @@
 	}
 
 	function estimatedDeviceControlWidth(device: MergedDevice) {
-		if (device.type === 'livestream') return 320;
+		if (device.type === 'livestream') return 500;
 		if (device.type === 'dome') return 170;
 		if (device.type === 'camera') return 320;
 		if (device.type === 'cover') return 300;

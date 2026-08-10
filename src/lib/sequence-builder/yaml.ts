@@ -1,4 +1,4 @@
-import { parse, stringify } from 'yaml';
+import { parse, Scalar, stringify } from 'yaml';
 import type {
 	ActionNode,
 	ExtraYamlFields,
@@ -22,6 +22,7 @@ const LIFECYCLE_KEYS = [
 	'until',
 	'update'
 ] as const;
+const CLOCK_TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/;
 const TOP_LEVEL_KEYS = new Set(['name', 'description', 'sequence', ...LIFECYCLE_KEYS]);
 const NODE_KEYS = {
 	sequence: new Set(['name', 'sequence', ...LIFECYCLE_KEYS]),
@@ -278,18 +279,24 @@ export function parseSequenceYaml(source: string): SequenceDocument {
 }
 
 function lifecycleYaml(node: Lifecycle) {
+	let until: string | Scalar<string> | undefined = node.until;
+	if (until !== undefined && CLOCK_TIME_PATTERN.test(until)) {
+		until = new Scalar(until);
+		until.type = Scalar.QUOTE_DOUBLE;
+	}
+
 	return {
 		...(node.delay !== undefined ? { delay: node.delay } : {}),
 		...(node.repeat !== undefined ? { repeat: node.repeat } : {}),
 		...(node.when !== undefined ? { when: node.when } : {}),
 		...(node.await !== undefined ? { await: node.await } : {}),
 		...(node.await_timeout !== undefined ? { await_timeout: node.await_timeout } : {}),
-		...(node.until !== undefined ? { until: node.until } : {}),
+		...(until !== undefined ? { until } : {}),
 		...(node.update !== undefined ? { update: node.update } : {})
 	};
 }
 
-function serializeNode(node: SequenceBlock): Record<string, YamlValue> {
+function serializeNode(node: SequenceBlock): Record<string, unknown> {
 	if (node.type === 'sequence') {
 		return {
 			...(node.extra ?? {}),
@@ -329,7 +336,7 @@ function serializeNode(node: SequenceBlock): Record<string, YamlValue> {
 }
 
 export function serializeSequenceYaml(document: SequenceDocument) {
-	const yamlDocument: Record<string, YamlValue> = {
+	const yamlDocument: Record<string, unknown> = {
 		...(document.extra ?? {}),
 		name: document.name,
 		...(document.description ? { description: document.description } : {}),

@@ -359,24 +359,26 @@ function validateLifecycle(
 	}
 
 	if (node.until !== undefined) {
-		if (CONDITION_PATTERN.test(node.until)) {
-			validateConditionExpression(
-				node.until,
-				'until',
-				node,
-				available,
-				parallelRegistrations,
-				conditions,
-				issues
-			);
-		} else if (!CLOCK_TIME_PATTERN.test(node.until)) {
-			pushIssue(
-				issues,
-				node,
-				'until',
-				'error',
-				'Until must be a 24-hour time or a {{ condition expression }}.'
-			);
+		if (!CLOCK_TIME_PATTERN.test(node.until)) {
+			if (CONDITION_PATTERN.test(node.until)) {
+				validateConditionExpression(
+					node.until,
+					'until',
+					node,
+					available,
+					parallelRegistrations,
+					conditions,
+					issues
+				);
+			} else {
+				pushIssue(
+					issues,
+					node,
+					'until',
+					'error',
+					'Until must be a 24-hour time or a {{ condition expression }}.'
+				);
+			}
 		}
 	}
 

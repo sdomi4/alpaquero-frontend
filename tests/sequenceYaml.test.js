@@ -96,6 +96,21 @@ test('serializeSequenceYaml preserves semantics and unknown fields', () => {
 	assert.equal(reparsed.root.children[1].type, 'pause');
 });
 
+test('serializeSequenceYaml quotes clock-based until values for backend YAML parsers', () => {
+	const document = parseSequenceYaml(`
+name: timed sequence
+until: "05:30"
+sequence:
+  - action: debug_print
+    until: "23:59:59"
+`);
+
+	const serialized = serializeSequenceYaml(document);
+
+	assert.match(serialized, /^until: "05:30"$/m);
+	assert.match(serialized, /^ {4}until: "23:59:59"$/m);
+});
+
 test('parseSequenceYaml rejects ambiguous nodes before they reach the backend', () => {
 	assert.throws(
 		() =>

@@ -359,6 +359,22 @@
 		applyDocument(removeBlock(document, selectedNode.id), document.root.id);
 	}
 
+	function handleDeleteKey(event: KeyboardEvent) {
+		if (event.key !== 'Delete' || event.defaultPrevented) return;
+
+		const target = event.target;
+		if (
+			target instanceof HTMLElement &&
+			(target.isContentEditable || Boolean(target.closest('input, textarea, select')))
+		) {
+			return;
+		}
+		if (!selectedNode || selectedNode.id === document.root.id) return;
+
+		event.preventDefault();
+		deleteSelected();
+	}
+
 	function selectFirstIssue() {
 		if (issues[0]) selectedId = issues[0].nodeId;
 	}
@@ -496,6 +512,8 @@
 		return normalized.includes('int') || normalized.includes('float');
 	}
 </script>
+
+<svelte:window onkeydown={handleDeleteKey} />
 
 <svelte:head>
 	<title>Sequence Builder | Alpaquero</title>

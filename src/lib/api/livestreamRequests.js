@@ -73,3 +73,38 @@ export function startLivestream(name, fetcher = fetch) {
 export function stopLivestream(name, fetcher = fetch) {
 	return runLivestreamAction(name, 'stop', fetcher);
 }
+
+/**
+ * @param {string} name
+ * @param {typeof globalThis.fetch} [fetcher]
+ */
+export async function getLivestreamCameraSettings(name, fetcher = fetch) {
+	const response = await fetcher(`${LIVESTREAM_API_BASE}/${encodeURIComponent(name)}/camera`);
+
+	if (!response.ok) {
+		throw await livestreamResponseError(response, 'Livestream camera settings');
+	}
+
+	return response.json();
+}
+
+/**
+ * @param {string} name
+ * @param {Record<string, unknown>} settings
+ * @param {typeof globalThis.fetch} [fetcher]
+ */
+export async function updateLivestreamCameraSettings(name, settings, fetcher = fetch) {
+	const response = await fetcher(`${LIVESTREAM_API_BASE}/${encodeURIComponent(name)}/camera`, {
+		method: 'PATCH',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(settings)
+	});
+
+	if (!response.ok) {
+		throw await livestreamResponseError(response, 'Livestream camera update');
+	}
+
+	return response.json().catch(() => null);
+}

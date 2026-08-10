@@ -35,6 +35,18 @@ test('livestream controls render as a device-style control instead of inside cam
 	);
 });
 
+test('livestream controls load and edit exposure and gain camera settings', () => {
+	assert.match(livestreamControls, /getLivestreamCameraSettings\(name\)/);
+	assert.match(livestreamControls, /updateLivestreamCameraSettings\(selectedName/);
+	assert.match(livestreamControls, /controls: \{ \[control\]: value \}/);
+	assert.match(livestreamControls, /Exposure us/);
+	assert.match(livestreamControls, />Gain<\/span>/);
+	assert.equal((livestreamControls.match(/type="range"/g) ?? []).length, 2);
+	assert.equal((livestreamControls.match(/type="number"/g) ?? []).length, 2);
+	assert.match(livestreamControls, /setCameraControl\('exposure'\)/);
+	assert.match(livestreamControls, /setCameraControl\('gain'\)/);
+});
+
 test('mobile exposes livestreams through the standard control selector', () => {
 	assert.match(
 		mobilePage,

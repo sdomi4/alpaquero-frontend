@@ -114,7 +114,7 @@ test('dropping onto a direct action branch promotes it to an ordered sequence', 
 	]);
 });
 
-test('dropping to the right of a parallel group creates an appendable branch', () => {
+test('dropping to the right of a parallel group creates a direct branch', () => {
 	const document = createDocument();
 	const action = createAction('action-c', 'Action C', 'action_c', 5);
 	const updated = insertParallelBranch(document, 'parallel', 2, action);
@@ -123,10 +123,8 @@ test('dropping to the right of a parallel group creates an appendable branch', (
 	assert.equal(parallel?.type, 'parallel');
 	assert.equal(parallel?.type === 'parallel' ? parallel.children.length : 0, 3);
 	const branch = parallel?.type === 'parallel' ? parallel.children[2] : null;
-	assert.equal(branch?.type, 'sequence');
-	assert.deepEqual(branch?.type === 'sequence' ? branch.children.map((node) => node.id) : [], [
-		'action-c'
-	]);
+	assert.equal(branch?.type, 'action');
+	assert.equal(branch?.id, 'action-c');
 });
 
 test('existing blocks can append to a branch or become a new parallel branch', () => {
@@ -147,11 +145,8 @@ test('existing blocks can append to a branch or become a new parallel branch', (
 	const branchedParallel = branched.root.children[0];
 	assert.equal(branchedParallel.type, 'parallel');
 	const newBranch = branchedParallel.type === 'parallel' ? branchedParallel.children[2] : null;
-	assert.equal(newBranch?.type, 'sequence');
-	assert.deepEqual(
-		newBranch?.type === 'sequence' ? newBranch.children.map((node) => node.id) : [],
-		['after']
-	);
+	assert.equal(newBranch?.type, 'action');
+	assert.equal(newBranch?.id, 'after');
 });
 
 test('moving a container into its own descendant is rejected without mutation', () => {
@@ -376,6 +371,28 @@ test('validation enforces reserved registrations and condition metadata', () => 
 		issues.some((issue) => issue.message.includes('unknown condition')),
 		true
 	);
+});
+
+test('validation accepts clock times for until without a wrapped condition expression', () => {
+	for (const until of ['05:30', '23:59:59']) {
+		const root = createSequence('root', 'Timed sequence', [
+			createAction('action', 'Timed action', 'timed_action', 0)
+		]);
+		root.until = until;
+		const document = {
+			id: `timed-until-${until}`,
+			name: 'Timed until',
+			version: 1,
+			root
+		};
+
+		assert.equal(
+			validateSequence(document).some(
+				(issue) => issue.nodeId === root.id && issue.severity === 'error'
+			),
+			false
+		);
+	}
 });
 
 test('validation rejects lifecycle fields preserved on pause nodes', () => {

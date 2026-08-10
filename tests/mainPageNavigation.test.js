@@ -146,3 +146,11 @@ test('blocks use their full card as the selection target without calculated dura
 	assert.doesNotMatch(blockNode, /join ·/);
 	assert.doesNotMatch(blockNode, /nodeDescription/);
 });
+
+test('the delete key invokes the selected block delete action outside editable controls', () => {
+	assert.match(sequenceBuilder, /<svelte:window onkeydown=\{handleDeleteKey\} \/>/);
+	assert.match(sequenceBuilder, /event\.key !== 'Delete'/);
+	assert.match(sequenceBuilder, /target\.closest\('input, textarea, select'\)/);
+	assert.match(sequenceBuilder, /deleteSelected\(\)/);
+	assert.match(sequenceBuilder, /onclick=\{deleteSelected\}/);
+});

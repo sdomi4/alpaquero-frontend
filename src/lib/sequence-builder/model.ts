@@ -257,17 +257,6 @@ export function moveBlock(
 	return root === removed.node ? document : { ...document, root };
 }
 
-function asParallelBranch(block: SequenceBlock, index: number): SequenceBlock {
-	if (block.type === 'sequence') return block;
-
-	return {
-		id: createId('sequence'),
-		type: 'sequence',
-		name: `Branch ${index + 1}`,
-		children: [block]
-	};
-}
-
 function insertParallelBranchIntoRoot(
 	root: SequenceNode,
 	parallelId: string,
@@ -277,7 +266,7 @@ function insertParallelBranchIntoRoot(
 	const parallel = findNode(root, parallelId);
 	if (parallel?.type !== 'parallel') return root;
 
-	return insertIntoRoot(root, parallelId, index, asParallelBranch(block, index));
+	return insertIntoRoot(root, parallelId, index, block);
 }
 
 export function insertParallelBranch(
