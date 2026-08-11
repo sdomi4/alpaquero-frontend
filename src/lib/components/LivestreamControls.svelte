@@ -11,7 +11,7 @@
 
 	type LivestreamStatus = 'unknown' | 'running' | 'stopped';
 	type LivestreamResponse = { running?: unknown } | null;
-	type CameraControl = 'exposure' | 'gain';
+	type CameraControl = 'exposure' | 'gain' | 'cooler_on' | 'target_temp' | 'flip';
 	type Props = {
 		initialLivestreams?: Record<string, string> | null;
 		onAvailabilityChange?: (available: boolean) => void;
@@ -34,6 +34,9 @@
 	let error = $state<string | null>(null);
 	let exposure = $state(1000);
 	let gain = $state(0);
+	let coolerOn = $state(false);
+	let targetTemperature = $state(-10);
+	let flip = $state<0 | 1 | 2 | 3>(0);
 	let cameraSettingsLoading = $state((initialNames?.length ?? 0) > 0);
 	let pendingCameraControl = $state<CameraControl | null>(null);
 	let cameraSettingsError = $state<string | null>(null);
@@ -117,9 +120,19 @@
 
 		const nextExposure = Number(controls.exposure);
 		const nextGain = Number(controls.gain);
+		const nextCoolerOn = Number(controls.cooler_on);
+		const nextTargetTemperature = Number(controls.target_temp);
+		const nextFlip = Number(controls.flip);
 
 		if (Number.isFinite(nextExposure)) exposure = Math.max(1, Math.round(nextExposure));
 		if (Number.isFinite(nextGain)) gain = Math.max(0, Math.round(nextGain));
+		if (nextCoolerOn === 0 || nextCoolerOn === 1) coolerOn = nextCoolerOn === 1;
+		if (Number.isFinite(nextTargetTemperature)) {
+			targetTemperature = Math.round(nextTargetTemperature);
+		}
+		if (nextFlip === 0 || nextFlip === 1 || nextFlip === 2 || nextFlip === 3) {
+			flip = nextFlip;
+		}
 	}
 
 	async function loadCameraSettings(name: string) {
@@ -145,11 +158,8 @@
 	async function setCameraControl(control: CameraControl) {
 		if (!selectedName || pendingCameraControl) return;
 
-		const value =
-			control === 'exposure' ? Math.max(1, Math.round(exposure)) : Math.max(0, Math.round(gain));
-
-		if (control === 'exposure') exposure = value;
-		else gain = value;
+		const value = cameraControlValue(control);
+		applyLocalCameraControl(control, value);
 
 		pendingCameraControl = control;
 		cameraSettingsError = null;
@@ -163,6 +173,45 @@
 			cameraSettingsError = err instanceof Error ? err.message : `Failed to set camera ${control}`;
 		} finally {
 			pendingCameraControl = null;
+		}
+	}
+
+	function finiteInteger(value: number, fallback: number) {
+		return Math.round(Number.isFinite(value) ? value : fallback);
+	}
+
+	function cameraControlValue(control: CameraControl) {
+		switch (control) {
+			case 'exposure':
+				return Math.max(1, finiteInteger(exposure, 1000));
+			case 'gain':
+				return Math.max(0, finiteInteger(gain, 0));
+			case 'cooler_on':
+				return coolerOn ? 1 : 0;
+			case 'target_temp':
+				return finiteInteger(targetTemperature, -10);
+			case 'flip':
+				return flip;
+		}
+	}
+
+	function applyLocalCameraControl(control: CameraControl, value: number) {
+		switch (control) {
+			case 'exposure':
+				exposure = value;
+				break;
+			case 'gain':
+				gain = value;
+				break;
+			case 'cooler_on':
+				coolerOn = value === 1;
+				break;
+			case 'target_temp':
+				targetTemperature = value;
+				break;
+			case 'flip':
+				flip = value as 0 | 1 | 2 | 3;
+				break;
 		}
 	}
 </script>
@@ -304,6 +353,70 @@
 							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
 						>
 							{pendingCameraControl === 'gain' ? '...' : 'Set'}
+						</button>
+					</label>
+
+					<div class="grid grid-cols-[4.5rem_minmax(6rem,1fr)_auto] items-center gap-1.5">
+						<span class="text-neutral-400">Cooler</span>
+						<label
+							class="flex cursor-pointer items-center justify-between gap-2 border border-neutral-600 bg-neutral-900 px-2 py-1"
+						>
+							<span class="font-black text-neutral-100">{coolerOn ? 'Enabled' : 'Disabled'}</span>
+							<input
+								type="checkbox"
+								bind:checked={coolerOn}
+								disabled={cameraSettingsLoading || pendingCameraControl !== null}
+								class="size-4 accent-[#80499c]"
+							/>
+						</label>
+						<button
+							type="button"
+							onclick={() => setCameraControl('cooler_on')}
+							disabled={cameraSettingsLoading || pendingCameraControl !== null}
+							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+						>
+							{pendingCameraControl === 'cooler_on' ? '...' : 'Set'}
+						</button>
+					</div>
+
+					<label class="grid grid-cols-[4.5rem_minmax(6rem,1fr)_auto] items-center gap-1.5">
+						<span class="text-neutral-400">Target C</span>
+						<input
+							type="number"
+							step="1"
+							bind:value={targetTemperature}
+							disabled={cameraSettingsLoading || pendingCameraControl !== null}
+							class="w-full border border-neutral-600 bg-neutral-900 px-1.5 py-1 text-right font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+						/>
+						<button
+							type="button"
+							onclick={() => setCameraControl('target_temp')}
+							disabled={cameraSettingsLoading || pendingCameraControl !== null}
+							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+						>
+							{pendingCameraControl === 'target_temp' ? '...' : 'Set'}
+						</button>
+					</label>
+
+					<label class="grid grid-cols-[4.5rem_minmax(6rem,1fr)_auto] items-center gap-1.5">
+						<span class="text-neutral-400">Flip</span>
+						<select
+							bind:value={flip}
+							disabled={cameraSettingsLoading || pendingCameraControl !== null}
+							class="w-full border border-neutral-600 bg-neutral-900 px-1.5 py-1 font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+						>
+							<option value={0}>No flip</option>
+							<option value={1}>Horizontal</option>
+							<option value={2}>Vertical</option>
+							<option value={3}>Horizontal + vertical</option>
+						</select>
+						<button
+							type="button"
+							onclick={() => setCameraControl('flip')}
+							disabled={cameraSettingsLoading || pendingCameraControl !== null}
+							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+						>
+							{pendingCameraControl === 'flip' ? '...' : 'Set'}
 						</button>
 					</label>
 				</div>

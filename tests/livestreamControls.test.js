@@ -42,9 +42,23 @@ test('livestream controls load and edit exposure and gain camera settings', () =
 	assert.match(livestreamControls, /Exposure us/);
 	assert.match(livestreamControls, />Gain<\/span>/);
 	assert.equal((livestreamControls.match(/type="range"/g) ?? []).length, 2);
-	assert.equal((livestreamControls.match(/type="number"/g) ?? []).length, 2);
+	assert.equal((livestreamControls.match(/type="number"/g) ?? []).length, 3);
 	assert.match(livestreamControls, /setCameraControl\('exposure'\)/);
 	assert.match(livestreamControls, /setCameraControl\('gain'\)/);
+});
+
+test('livestream controls expose cooler, target temperature, and flip settings', () => {
+	assert.match(livestreamControls, /coolerOn = \$state\(false\)/);
+	assert.match(livestreamControls, /targetTemperature = \$state\(-10\)/);
+	assert.match(livestreamControls, /setCameraControl\('cooler_on'\)/);
+	assert.match(livestreamControls, /setCameraControl\('target_temp'\)/);
+	assert.match(livestreamControls, /setCameraControl\('flip'\)/);
+	assert.match(livestreamControls, /return coolerOn \? 1 : 0/);
+	assert.match(livestreamControls, /<option value=\{0\}>No flip<\/option>/);
+	assert.match(livestreamControls, /<option value=\{1\}>Horizontal<\/option>/);
+	assert.match(livestreamControls, /<option value=\{2\}>Vertical<\/option>/);
+	assert.match(livestreamControls, /<option value=\{3\}>Horizontal \+ vertical<\/option>/);
+	assert.match(livestreamControls, /case 'flip':\s+return flip/);
 });
 
 test('mobile exposes livestreams through the standard control selector', () => {
