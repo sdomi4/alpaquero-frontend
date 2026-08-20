@@ -269,6 +269,18 @@ export async function abortSequence(contextId: string) {
 	return res.json().catch(() => null);
 }
 
+export async function getLiveSequenceTree(contextId: string) {
+	const res = await fetch(
+		`${OBSERVATORY_API_BASE}/sequences/live/${encodeURIComponent(contextId)}`
+	);
+
+	if (!res.ok) {
+		throw await sequenceResponseError(res, 'Live sequence tree load');
+	}
+
+	return res.json();
+}
+
 async function sequenceResponseError(response: Response, operation: string) {
 	const payload = await response
 		.clone()

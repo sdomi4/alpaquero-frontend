@@ -54,6 +54,7 @@
 		sequence_name: string;
 		status: string;
 		info: string | null;
+		steps: Record<string, number>;
 	};
 
 	type Instrument = {
@@ -749,7 +750,7 @@
 	{/if}
 
 	<section class="grid min-h-0 gap-2 xl:grid-cols-[minmax(0,2fr)_minmax(24rem,2fr)]">
-		<CameraFeed feeds={cameraFeeds} />
+		<CameraFeed feeds={cameraFeeds} sequences={liveSequences} />
 
 		<aside class="grid min-h-0 grid-rows-[minmax(0,0.58fr)_minmax(0,1fr)] gap-2">
 			<section class="min-h-0">

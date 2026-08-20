@@ -56,6 +56,7 @@
 		sequence_name: string;
 		status: string;
 		info: string | null;
+		steps: Record<string, number>;
 	};
 
 	type LogMessage = {
@@ -549,7 +550,7 @@
 
 	<section class="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
 		<div class="min-h-0">
-			<CameraFeed feeds={cameraFeeds} />
+			<CameraFeed feeds={cameraFeeds} sequences={liveSequences} />
 		</div>
 
 		<section

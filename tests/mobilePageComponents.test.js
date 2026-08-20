@@ -30,7 +30,7 @@ test('mobile page uses the shared camera, observing conditions, and logger compo
 	);
 	assert.match(mobilePage, /selectedControl\?\.kind === 'livestreams'/);
 	assert.match(mobilePage, /<LivestreamControls[\s\S]*initialLivestreams=\{data\.livestreams\}/);
-	assert.match(mobilePage, /<CameraFeed feeds=\{cameraFeeds\}\s*\/>/);
+	assert.match(mobilePage, /<CameraFeed feeds=\{cameraFeeds\} sequences=\{liveSequences\}\s*\/>/);
 	assert.match(mobilePage, /device\.type === 'camera'\s*\?\s*CameraBlock/);
 	assert.match(mobilePage, /<ObservingConditionsBlock/);
 	assert.match(

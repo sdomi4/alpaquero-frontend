@@ -2,10 +2,9 @@
 	import { onMount } from 'svelte';
 	import { PUBLIC_WS_BASE } from '$env/static/public';
 	import { buildWebrtcFeedUrl } from '$lib/cameraFeeds.js';
-	import {
-		buildFullPreviewImagePath,
-		normalizeCapturePreviews
-	} from '$lib/previewImages.js';
+	import LiveSequenceView from '$lib/components/sequences/LiveSequenceView.svelte';
+	import type { LiveSequenceState } from '$lib/live-sequences';
+	import { buildFullPreviewImagePath, normalizeCapturePreviews } from '$lib/previewImages.js';
 
 	type CameraFeed = {
 		id: string;
@@ -21,11 +20,13 @@
 
 	type Props = {
 		feeds: CameraFeed[];
+		sequences: Record<string, LiveSequenceState>;
 	};
 
-	let { feeds }: Props = $props();
+	let { feeds, sequences }: Props = $props();
 
 	const PREVIEWS_TAB_ID = '__capture_previews__';
+	const SEQUENCE_TAB_ID = '__sequence_view__';
 
 	let activeId = $state('');
 	let currentHref = $state('');
@@ -34,8 +35,11 @@
 	let fullPreviewError = $state('');
 
 	const showingPreviews = $derived(activeId === PREVIEWS_TAB_ID);
+	const showingSequence = $derived(activeId === SEQUENCE_TAB_ID);
 	const activeFeed = $derived(
-		showingPreviews ? null : (feeds.find((feed) => feed.id === activeId) ?? feeds[0] ?? null)
+		showingPreviews || showingSequence
+			? null
+			: (feeds.find((feed) => feed.id === activeId) ?? feeds[0] ?? null)
 	);
 	const activeUrl = $derived(
 		!showingPreviews && activeFeed && currentHref
@@ -47,7 +51,11 @@
 	);
 
 	$effect(() => {
-		if (activeId !== PREVIEWS_TAB_ID && !feeds.some((feed) => feed.id === activeId)) {
+		if (
+			activeId !== PREVIEWS_TAB_ID &&
+			activeId !== SEQUENCE_TAB_ID &&
+			!feeds.some((feed) => feed.id === activeId)
+		) {
 			activeId = feeds[0]?.id ?? PREVIEWS_TAB_ID;
 		}
 	});
@@ -84,9 +92,24 @@
 	class="flex h-full min-h-0 flex-col border-2 border-neutral-700 bg-neutral-900 p-2 shadow-[4px_4px_0_#80499c]"
 >
 	<div class="mb-2 flex items-center justify-between gap-3 border-b-2 border-neutral-700 pb-2">
-		<h2 class="text-lg leading-none font-black uppercase">Camera feeds</h2>
+		<button
+			type="button"
+			onclick={() => {
+				activeId = SEQUENCE_TAB_ID;
+			}}
+			class="shrink-0 border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+			class:border-[#80499c]={showingSequence}
+			class:bg-[#80499c]={showingSequence}
+			class:text-neutral-50={showingSequence}
+			class:border-neutral-600={!showingSequence}
+			class:bg-neutral-950={!showingSequence}
+			class:text-neutral-300={!showingSequence}
+			aria-pressed={showingSequence}
+		>
+			Sequence View
+		</button>
 
-		<div class="flex flex-wrap justify-end gap-1">
+		<div class="flex flex-wrap justify-end gap-1.5">
 			{#if feeds.length > 0}
 				{#each feeds as feed (feed.id)}
 					<button
@@ -94,7 +117,7 @@
 						onclick={() => {
 							activeId = feed.id;
 						}}
-						class="border px-2 py-1 font-mono text-[0.65rem] leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+						class="border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
 						class:border-[#80499c]={feed.id === activeFeed?.id}
 						class:bg-[#80499c]={feed.id === activeFeed?.id}
 						class:text-neutral-50={feed.id === activeFeed?.id}
@@ -113,7 +136,7 @@
 				onclick={() => {
 					activeId = PREVIEWS_TAB_ID;
 				}}
-				class="border px-2 py-1 font-mono text-[0.65rem] leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+				class="border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
 				class:border-[#80499c]={showingPreviews}
 				class:bg-[#80499c]={showingPreviews}
 				class:text-neutral-50={showingPreviews}
@@ -127,7 +150,11 @@
 		</div>
 	</div>
 
-	{#if showingPreviews}
+	{#if showingSequence}
+		<div class="min-h-0 flex-1 overflow-hidden border-2 border-neutral-700 bg-neutral-950">
+			<LiveSequenceView {sequences} />
+		</div>
+	{:else if showingPreviews}
 		<div class="min-h-0 flex-1 overflow-hidden border-2 border-neutral-700 bg-neutral-950">
 			<div class="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-2 p-2">
 				<div class="flex justify-end font-mono text-[0.65rem] text-neutral-500 uppercase">
@@ -135,13 +162,17 @@
 				</div>
 
 				{#if previews.length === 0}
-					<div class="grid h-full place-items-center p-4 text-center font-mono text-sm text-neutral-500">
+					<div
+						class="grid h-full place-items-center p-4 text-center font-mono text-sm text-neutral-500"
+					>
 						No capture previews received.
 					</div>
 				{:else}
 					<div class="grid min-h-0 gap-2 overflow-y-auto pr-1 sm:grid-cols-3">
 						{#each previews as preview (preview.name)}
-							<article class="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] border border-neutral-700 bg-neutral-900">
+							<article
+								class="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] border border-neutral-700 bg-neutral-900"
+							>
 								<div class="min-h-0 bg-neutral-950">
 									<img
 										src={preview.src}
@@ -238,7 +269,9 @@
 
 			<div class="min-h-0 bg-neutral-950 p-2">
 				{#if fullPreviewError}
-					<div class="grid h-full place-items-center p-4 text-center font-mono text-sm text-red-200">
+					<div
+						class="grid h-full place-items-center p-4 text-center font-mono text-sm text-red-200"
+					>
 						{fullPreviewError}
 					</div>
 				{:else}
