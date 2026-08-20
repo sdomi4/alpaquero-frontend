@@ -79,7 +79,7 @@
 	}
 
 	function clampBrightness(value: number) {
-		return Math.max(0, Math.min(100, Math.round(value)));
+		return Math.max(0, Math.min(255, Math.round(value)));
 	}
 
 	async function runCover(action: 'open' | 'close') {
@@ -155,7 +155,7 @@
 						id={`brightness-slider-${device.id}`}
 						type="range"
 						min="0"
-						max="100"
+						max="255"
 						step="1"
 						bind:value={targetBrightness}
 						disabled={!device.connected || calibratorPending !== null}
@@ -173,7 +173,7 @@
 						id={`brightness-number-${device.id}`}
 						type="number"
 						min="0"
-						max="100"
+						max="255"
 						bind:value={targetBrightness}
 						onchange={() => {
 							targetBrightness = clampBrightness(targetBrightness);
