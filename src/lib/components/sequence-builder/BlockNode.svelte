@@ -109,6 +109,7 @@
 			{#if !isRoot}
 				<button
 					type="button"
+					data-shadowless
 					aria-label={`Drag ${nodeLabel(node)}`}
 					title="Drag block"
 					{@attach draggable.attach}
@@ -123,6 +124,7 @@
 
 			<button
 				type="button"
+				data-shadowless
 				onclick={() => onSelect(node.id)}
 				class="flex min-w-0 flex-1 items-center gap-2 text-left"
 				aria-pressed={selectedId === node.id}
