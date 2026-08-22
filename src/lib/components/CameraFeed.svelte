@@ -237,6 +237,7 @@
 	<div class="fixed inset-0 z-50 grid place-items-center bg-neutral-950/90 p-3">
 		<button
 			type="button"
+			data-shadowless
 			class="absolute inset-0 h-full w-full cursor-default border-0 bg-transparent p-0"
 			aria-label="Close full size preview"
 			onclick={closePreview}

@@ -84,6 +84,7 @@
 		<div class="flex items-center gap-1">
 			<a
 				href={resolve('/sequences/new')}
+				data-control
 				class="border border-[#80499c] bg-[#211428] px-2 py-0.5 font-mono text-[0.65rem] font-black text-purple-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
 			>
 				new
@@ -117,6 +118,7 @@
 							<div class="flex shrink-0 items-center gap-1">
 								<a
 									href={sequenceEditorHref(sequence)}
+									data-control
 									aria-label={`Edit sequence ${sequence}`}
 									class="border border-sky-700 bg-sky-950 px-2 py-0.5 font-mono text-[0.65rem] font-black text-sky-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-sky-900 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
 								>

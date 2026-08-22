@@ -14,3 +14,49 @@ body {
 
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
+
+/*
+ * Controls sit above the observatory's read-only badges and panels.
+ * Keep panel/component shadows local to their components; this stronger,
+ * two-step shadow is reserved for things the operator can press.
+ */
+button:not(:disabled):not([data-shadowless]),
+a[data-control] {
+	margin-inline-end: 0.1875rem;
+	margin-block-end: 0.1875rem;
+	box-shadow:
+		4px 4px 0 #a855f7,
+		7px 7px 0 rgb(76 29 149 / 55%);
+	transition:
+		transform 100ms ease,
+		box-shadow 100ms ease,
+		background-color 100ms ease,
+		border-color 100ms ease;
+}
+
+button:not(:disabled):not([data-shadowless]):hover,
+a[data-control]:hover {
+	transform: translate(-1px, -1px);
+	box-shadow:
+		5px 5px 0 #c084fc,
+		8px 8px 0 rgb(76 29 149 / 60%);
+}
+
+button:not(:disabled):not([data-shadowless]):active,
+a[data-control]:active {
+	transform: translate(3px, 3px);
+	box-shadow: 1px 1px 0 #a855f7;
+}
+
+button:focus-visible,
+a[data-control]:focus-visible {
+	outline: 2px solid #e9d5ff;
+	outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	button:not(:disabled):not([data-shadowless]),
+	a[data-control] {
+		transition: none;
+	}
+}

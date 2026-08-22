@@ -526,7 +526,7 @@
 		</div>
 
 		<div
-			class="min-w-0 border-2 px-2 py-1.5 font-mono text-xs uppercase shadow-[2px_2px_0_#80499c]"
+			class="min-w-0 border-2 px-2 py-1.5 font-mono text-xs uppercase"
 			class:border-emerald-300={safetyState === 'safe'}
 			class:bg-emerald-950={safetyState === 'safe'}
 			class:text-emerald-100={safetyState === 'safe'}
@@ -561,15 +561,31 @@
 					<h2 class="text-base leading-none font-black uppercase">Control</h2>
 				</div>
 
-				<select
-					bind:value={selectedControlId}
-					class="w-full border border-[#80499c] bg-neutral-950 px-2 py-2 font-mono text-sm font-black text-neutral-100 uppercase outline-none focus:border-purple-300"
-					aria-label="Select control"
+				<label
+					for="mobile-control-select"
+					class="font-mono text-[0.65rem] leading-none font-black tracking-[0.16em] text-purple-300 uppercase"
 				>
-					{#each controlOptions as option (option.id)}
-						<option value={option.id}>{option.label}</option>
-					{/each}
-				</select>
+					Select control view
+				</label>
+
+				<div class="mobile-control-select relative">
+					<select
+						id="mobile-control-select"
+						bind:value={selectedControlId}
+						class="w-full cursor-pointer appearance-none border-2 border-[#a855f7] bg-[#211428] py-2.5 pr-12 pl-3 font-mono text-sm font-black text-purple-50 uppercase outline-none hover:border-purple-300 hover:bg-[#2f1c39] focus:border-purple-200 focus:bg-[#2f1c39]"
+					>
+						{#each controlOptions as option (option.id)}
+							<option value={option.id}>{option.label}</option>
+						{/each}
+					</select>
+
+					<span
+						aria-hidden="true"
+						class="pointer-events-none absolute inset-y-0 right-0 grid w-10 place-items-center border-l-2 border-purple-300 bg-[#80499c] text-base font-black text-white"
+					>
+						▼
+					</span>
+				</div>
 			</div>
 
 			{#if data.error}
@@ -707,3 +723,30 @@
 		</section>
 	</section>
 </main>
+
+<style>
+	.mobile-control-select {
+		margin-inline-end: 0.1875rem;
+		margin-block-end: 0.1875rem;
+		box-shadow:
+			4px 4px 0 #a855f7,
+			7px 7px 0 rgb(76 29 149 / 55%);
+		transition:
+			transform 100ms ease,
+			box-shadow 100ms ease;
+	}
+
+	.mobile-control-select:hover,
+	.mobile-control-select:focus-within {
+		transform: translate(-1px, -1px);
+		box-shadow:
+			5px 5px 0 #c084fc,
+			8px 8px 0 rgb(76 29 149 / 60%);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.mobile-control-select {
+			transition: none;
+		}
+	}
+</style>

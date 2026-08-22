@@ -580,6 +580,7 @@
 			</button>
 			<a
 				href={resolve('/')}
+				data-control
 				class="border border-neutral-600 bg-neutral-950 px-2 py-1.5 text-[0.65rem] font-black uppercase hover:border-neutral-300"
 			>
 				Close

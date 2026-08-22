@@ -706,7 +706,7 @@
 		</div>
 
 		<div
-			class="justify-self-start border-2 px-3 py-1.5 font-mono text-sm uppercase shadow-[3px_3px_0_#80499c] lg:justify-self-end"
+			class="justify-self-start border-2 px-3 py-1.5 font-mono text-sm uppercase lg:justify-self-end"
 			class:border-emerald-300={safetyState === 'safe'}
 			class:bg-emerald-950={safetyState === 'safe'}
 			class:text-emerald-100={safetyState === 'safe'}
@@ -726,6 +726,7 @@
 		>
 			<a
 				href={resolve('/sequences/new')}
+				data-control
 				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 transition-transform hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px]"
 			>
 				Builder
@@ -733,6 +734,7 @@
 
 			<a
 				href={resolve('/pinpoint')}
+				data-control
 				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 transition-transform hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px]"
 			>
 				Pinpoint

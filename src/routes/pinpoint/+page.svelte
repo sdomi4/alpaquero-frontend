@@ -106,6 +106,7 @@
 
 			<a
 				href="/"
+				data-control
 				class="w-fit border border-[#80499c] bg-[#211428] px-3 py-1.5 font-mono text-xs text-purple-100 uppercase transition-transform hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px]"
 			>
 				Main
