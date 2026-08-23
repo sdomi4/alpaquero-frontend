@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import {
 		getLivestreamCameraSettings,
 		listLivestreams,
@@ -27,9 +27,10 @@
 				: normalizeLivestreamNames(initialCatalog);
 
 	let livestreams = $state<string[] | null>(initialNames);
+	let connected = $state(false);
 	let selectedName = $state(initialNames?.[0] ?? '');
 	let statuses = $state<Record<string, LivestreamStatus>>({});
-	let loading = $state(initialCatalog === undefined);
+	let loading = $state(false);
 	let pendingAction = $state<'start' | 'stop' | null>(null);
 	let error = $state<string | null>(null);
 	let exposure = $state(1000);
@@ -37,7 +38,7 @@
 	let coolerOn = $state(false);
 	let targetTemperature = $state(-10);
 	let flip = $state<0 | 1 | 2 | 3>(0);
-	let cameraSettingsLoading = $state((initialNames?.length ?? 0) > 0);
+	let cameraSettingsLoading = $state(false);
 	let pendingCameraControl = $state<CameraControl | null>(null);
 	let cameraSettingsError = $state<string | null>(null);
 	let cameraSettingsRequestId = 0;
@@ -48,16 +49,28 @@
 
 	$effect(() => {
 		const name = selectedName;
-		if (!name) return;
+		if (!connected || !name) return;
 
 		void loadCameraSettings(name);
 	});
 
-	onMount(() => {
+	function toggleConnection() {
+		connected = !connected;
+
+		if (!connected) {
+			cameraSettingsRequestId += 1;
+			cameraSettingsLoading = false;
+			error = null;
+			cameraSettingsError = null;
+			return;
+		}
+
 		if (initialCatalog === undefined) void loadLivestreams();
-	});
+	}
 
 	async function loadLivestreams() {
+		if (!connected) return;
+
 		loading = true;
 		error = null;
 
@@ -76,7 +89,7 @@
 	}
 
 	async function runAction(action: 'start' | 'stop') {
-		if (!selectedName || pendingAction) return;
+		if (!connected || !selectedName || pendingAction) return;
 
 		pendingAction = action;
 		error = null;
@@ -136,6 +149,8 @@
 	}
 
 	async function loadCameraSettings(name: string) {
+		if (!connected) return;
+
 		const requestId = ++cameraSettingsRequestId;
 		cameraSettingsLoading = true;
 		cameraSettingsError = null;
@@ -143,11 +158,11 @@
 		try {
 			const settings = await getLivestreamCameraSettings(name);
 
-			if (requestId === cameraSettingsRequestId && name === selectedName) {
+			if (connected && requestId === cameraSettingsRequestId && name === selectedName) {
 				applyCameraSettings(settings);
 			}
 		} catch (err) {
-			if (requestId === cameraSettingsRequestId && name === selectedName) {
+			if (connected && requestId === cameraSettingsRequestId && name === selectedName) {
 				cameraSettingsError = err instanceof Error ? err.message : 'Failed to load camera settings';
 			}
 		} finally {
@@ -156,7 +171,7 @@
 	}
 
 	async function setCameraControl(control: CameraControl) {
-		if (!selectedName || pendingCameraControl) return;
+		if (!connected || !selectedName || pendingCameraControl) return;
 
 		const value = cameraControlValue(control);
 		applyLocalCameraControl(control, value);
@@ -221,27 +236,49 @@
 		class="flex h-full max-h-full w-full min-w-72 flex-col justify-self-start border border-neutral-700 bg-neutral-950 p-1.5 shadow-[2px_2px_0_#80499c]"
 	>
 		<header class="mb-1.5 flex items-center justify-between gap-2">
-			<h3 class="truncate text-xs leading-tight font-black uppercase">Livestreams</h3>
-			{#if livestreams.length > 0}
-				<span
-					class="shrink-0 border px-1.5 py-0.5 font-mono text-[0.6rem] leading-none font-black uppercase"
-					class:border-emerald-500={selectedStatus === 'running'}
-					class:bg-emerald-950={selectedStatus === 'running'}
-					class:text-emerald-100={selectedStatus === 'running'}
-					class:border-neutral-700={selectedStatus !== 'running'}
-					class:bg-neutral-900={selectedStatus !== 'running'}
-					class:text-purple-200={selectedStatus !== 'running'}
-					aria-live="polite"
-				>
-					{selectedStatus}
-				</span>
-			{/if}
+			<div class="flex min-w-0 items-center gap-1.5">
+				<h3 class="truncate text-xs leading-tight font-black uppercase">Livestreams</h3>
+				{#if connected && livestreams.length > 0}
+					<span
+						class="shrink-0 border px-1.5 py-0.5 font-mono text-[0.6rem] leading-none font-black uppercase"
+						class:border-emerald-500={selectedStatus === 'running'}
+						class:bg-emerald-950={selectedStatus === 'running'}
+						class:text-emerald-100={selectedStatus === 'running'}
+						class:border-neutral-700={selectedStatus !== 'running'}
+						class:bg-neutral-900={selectedStatus !== 'running'}
+						class:text-purple-200={selectedStatus !== 'running'}
+					>
+						{selectedStatus}
+					</span>
+				{/if}
+			</div>
+
+			<button
+				type="button"
+				onclick={toggleConnection}
+				disabled={loading || pendingAction !== null || pendingCameraControl !== null}
+				aria-pressed={connected}
+				class="w-20 shrink-0 border px-1.5 py-0.5 text-center font-mono text-[0.6rem] leading-none font-black uppercase"
+				class:border-[#80499c]={connected}
+				class:bg-[#80499c]={connected}
+				class:text-neutral-50={connected}
+				class:bg-red-700={!connected}
+				class:text-neutral-100={!connected}
+				class:cursor-wait={loading || pendingAction !== null || pendingCameraControl !== null}
+				title={connected ? 'Disable livestream requests' : 'Enable livestream requests'}
+			>
+				{connected ? 'Online' : 'Offline'}
+			</button>
 		</header>
 
 		<div
 			class="grid min-h-0 flex-1 content-start gap-1.5 overflow-y-auto pr-1 font-mono text-[0.65rem] uppercase"
 		>
-			{#if loading}
+			{#if !connected}
+				<p class="border border-dashed border-neutral-700 bg-neutral-900 p-2 text-neutral-500">
+					Connect to enable livestream requests.
+				</p>
+			{:else if loading}
 				<p class="border border-neutral-700 bg-neutral-900 p-2 text-neutral-500">Loading...</p>
 			{:else if livestreams.length === 0}
 				<p class="border border-dashed border-neutral-700 bg-neutral-900 p-2 text-neutral-500">

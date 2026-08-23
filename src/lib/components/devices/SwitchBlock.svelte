@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import DeviceShell from './DeviceShell.svelte';
 	import { setSwitchControl } from '$lib/api/observatory';
+	import { displayedSwitchControlValue, switchStateControlValue } from '$lib/switchControlState.js';
 
 	type Device = {
 		id: string;
@@ -43,47 +45,18 @@
 		onLifecycleComplete
 	}: Props = $props();
 
-	let pending = $state<number | null>(null);
+	let pendingByControl = $state<Record<number, boolean>>({});
 	let error = $state<string | null>(null);
 	let localValues = $state<Record<number, number>>({});
-
-	function stateControlValue(control: SwitchControl) {
-		const controls = device.state?.controls;
-
-		if (controls && typeof controls === 'object' && !Array.isArray(controls)) {
-			const byKey = (controls as Record<string, unknown>)[control.key];
-			const byLabel = (controls as Record<string, unknown>)[control.label];
-			const byId = Object.values(controls).find((raw) => {
-				if (!raw || typeof raw !== 'object') return false;
-				return Number((raw as { id?: unknown }).id) === control.id;
-			});
-			const match = byKey ?? byLabel ?? byId;
-
-			if (match && typeof match === 'object' && 'value' in match) {
-				return (match as { value?: unknown }).value;
-			}
-		}
-
-		return (
-			device.state?.[control.key] ??
-			device.state?.[control.label] ??
-			device.state?.[`switch_${control.id}`] ??
-			device.state?.[String(control.id)]
-		);
-	}
+	const localValueTimers: Record<number, ReturnType<typeof setTimeout>> = {};
+	const LOCAL_VALUE_MAX_AGE_MS = 2_000;
 
 	function valueFor(control: SwitchControl) {
-		const fromDeviceState = stateControlValue(control);
+		return displayedSwitchControlValue(device.state, control, localValues);
+	}
 
-		if (typeof fromDeviceState === 'boolean') return fromDeviceState ? 1 : 0;
-		if (typeof fromDeviceState === 'number') return fromDeviceState;
-
-		if (typeof control.value === 'boolean') return control.value ? 1 : 0;
-		if (typeof control.value === 'number') return control.value;
-
-		if (typeof localValues[control.id] === 'number') return localValues[control.id];
-
-		return control.control_type === 'toggle' ? 0 : (control.min_value ?? 0);
+	function isPending(control: SwitchControl) {
+		return pendingByControl[control.id] === true;
 	}
 
 	function clamp(control: SwitchControl, value: number) {
@@ -94,30 +67,69 @@
 		return Math.max(min, Math.min(max, cleanValue));
 	}
 
+	function retainLocalValue(controlId: number, value: number) {
+		const existingTimer = localValueTimers[controlId];
+		if (existingTimer) clearTimeout(existingTimer);
+
+		localValues = { ...localValues, [controlId]: value };
+		localValueTimers[controlId] = setTimeout(() => {
+			const nextLocalValues = { ...localValues };
+			delete nextLocalValues[controlId];
+			localValues = nextLocalValues;
+			delete localValueTimers[controlId];
+		}, LOCAL_VALUE_MAX_AGE_MS);
+	}
+
 	async function setControl(control: SwitchControl, value: number) {
-		if (!device.connected || pending !== null || !control.writeable) return;
+		if (!device.connected || isPending(control) || !control.writeable) return;
 
 		const next = control.control_type === 'toggle' ? (value > 0 ? 1 : 0) : clamp(control, value);
 
-		pending = control.id;
+		pendingByControl = { ...pendingByControl, [control.id]: true };
 		error = null;
 
 		try {
 			await setSwitchControl(device.id, control.id, next);
-
-			localValues = {
-				...localValues,
-				[control.id]: next
-			};
+			retainLocalValue(control.id, next);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to set switch';
 		} finally {
-			pending = null;
+			const nextPending = { ...pendingByControl };
+			delete nextPending[control.id];
+			pendingByControl = nextPending;
 		}
 	}
 
 	$effect(() => {
-		if (!device.connected) localValues = {};
+		if (!device.connected) {
+			for (const timer of Object.values(localValueTimers)) clearTimeout(timer);
+			for (const controlId of Object.keys(localValueTimers)) {
+				delete localValueTimers[Number(controlId)];
+			}
+			localValues = {};
+			return;
+		}
+
+		const nextLocalValues = { ...localValues };
+		let changed = false;
+
+		for (const [rawId, localValue] of Object.entries(localValues)) {
+			const controlId = Number(rawId);
+			const control = controls.find(({ id }) => id === controlId);
+			if (!control || switchStateControlValue(device.state, control) === localValue) {
+				delete nextLocalValues[controlId];
+				const timer = localValueTimers[controlId];
+				if (timer) clearTimeout(timer);
+				delete localValueTimers[controlId];
+				changed = true;
+			}
+		}
+
+		if (changed) localValues = nextLocalValues;
+	});
+
+	onDestroy(() => {
+		for (const timer of Object.values(localValueTimers)) clearTimeout(timer);
 	});
 </script>
 
@@ -148,7 +160,7 @@
 					{#if control.control_type === 'toggle'}
 						<button
 							type="button"
-							disabled={pending !== null || !control.writeable}
+							disabled={isPending(control) || !control.writeable}
 							onclick={() => setControl(control, active ? 0 : 1)}
 							class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border px-2 py-1.5 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 							class:border-[#80499c]={active}
@@ -160,7 +172,7 @@
 						>
 							<span class="truncate">{control.label}</span>
 							<span class="border border-current px-1.5 py-0.5 text-[0.6rem] leading-none">
-								{pending === control.id ? '...' : active ? 'on' : 'off'}
+								{isPending(control) ? '...' : active ? 'on' : 'off'}
 							</span>
 						</button>
 					{:else}
@@ -176,14 +188,14 @@
 									max={control.max_value ?? 1}
 									step={control.step ?? 1}
 									{value}
-									disabled={pending !== null || !control.writeable}
+									disabled={isPending(control) || !control.writeable}
 									onchange={(event) => setControl(control, Number(event.currentTarget.value))}
 									class="w-full border border-neutral-600 bg-neutral-900 px-1.5 py-0.5 text-xs text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 								/>
 
 								<button
 									type="button"
-									disabled={pending !== null || !control.writeable}
+									disabled={isPending(control) || !control.writeable}
 									onclick={() => setControl(control, value)}
 									class="border border-[#80499c] bg-neutral-800 px-2 py-1 text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:text-neutral-600"
 								>
@@ -197,7 +209,7 @@
 								max={control.max_value ?? 1}
 								step={control.step ?? 1}
 								{value}
-								disabled={pending !== null || !control.writeable}
+								disabled={isPending(control) || !control.writeable}
 								onchange={(event) => setControl(control, Number(event.currentTarget.value))}
 								class="h-4 w-full accent-[#80499c] disabled:opacity-40"
 							/>

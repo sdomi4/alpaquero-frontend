@@ -71,9 +71,13 @@ test('mobile exposes livestreams through the standard control selector', () => {
 	assert.doesNotMatch(mobilePage, /<LivestreamControls variant=/);
 });
 
-test('both pages preload livestream availability so null catalogs omit the control', () => {
-	assert.match(mainPageServer, /fetch\(backendUrl\('observatory\/livestreams'\)\)/);
-	assert.match(mobilePageServer, /fetch\(backendUrl\('observatory\/livestreams'\)\)/);
+test('livestream requests remain disconnected until the control is explicitly enabled', () => {
+	assert.doesNotMatch(mainPageServer, /fetch\(backendUrl\('observatory\/livestreams'\)\)/);
+	assert.doesNotMatch(mobilePageServer, /fetch\(backendUrl\('observatory\/livestreams'\)\)/);
+	assert.match(livestreamControls, /connected = \$state\(false\)/);
+	assert.match(livestreamControls, /onclick=\{toggleConnection\}/);
+	assert.match(livestreamControls, /if \(!connected\) return;/);
+	assert.match(livestreamControls, /Connect to enable livestream requests\./);
 	assert.match(mainPage, /data\.livestreams !== null/);
 	assert.match(mobilePage, /data\.livestreams !== null/);
 	assert.match(livestreamControls, /\{#if livestreams !== null\}/);

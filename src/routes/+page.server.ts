@@ -15,20 +15,17 @@ export type ConfiguredInstrument = {
 	devices: Array<Record<string, string>>;
 };
 
-export type ConfiguredLivestreams = Record<string, string> | null;
-
 function backendUrl(path: string) {
 	const base = API_BASE.endsWith('/') ? API_BASE : `${API_BASE}/`;
 	return new URL(path.replace(/^\/+/, ''), base).toString();
 }
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const [devicesRes, sequencesRes, camerasRes, instrumentsRes, livestreamsRes] = await Promise.all([
+	const [devicesRes, sequencesRes, camerasRes, instrumentsRes] = await Promise.all([
 		fetch(backendUrl('observatory/devices')),
 		fetch(backendUrl('sequences')),
 		fetch(backendUrl('observatory/cameras')),
-		fetch(backendUrl('observatory/instruments')),
-		fetch(backendUrl('observatory/livestreams'))
+		fetch(backendUrl('observatory/instruments'))
 	]);
 
 	return {
@@ -36,9 +33,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		sequences: sequencesRes.ok ? await sequencesRes.json() : [],
 		cameras: camerasRes.ok ? ((await camerasRes.json()) as ConfiguredCamera[]) : [],
 		instruments: instrumentsRes.ok ? ((await instrumentsRes.json()) as ConfiguredInstrument[]) : [],
-		livestreams: livestreamsRes.ok
-			? ((await livestreamsRes.json()) as ConfiguredLivestreams)
-			: undefined,
+		livestreams: undefined,
 		error: !devicesRes.ok
 			? `Failed to load devices: ${devicesRes.status} ${devicesRes.statusText}`
 			: null
