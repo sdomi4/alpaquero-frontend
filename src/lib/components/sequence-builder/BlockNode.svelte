@@ -236,7 +236,7 @@
 			</div>
 		{:else if node.type === 'parallel'}
 			<div class="overflow-x-auto p-2">
-				<div class="flex min-w-max items-stretch gap-2">
+				<div class="flex w-full min-w-0 items-stretch gap-2">
 					{#each node.children as child, index (child.id)}
 						<ParallelBranchDropTarget parallelId={node.id} branchId={child.id} {index}>
 							<BlockNode node={child} {selectedId} {issues} {actions} {onSelect} />

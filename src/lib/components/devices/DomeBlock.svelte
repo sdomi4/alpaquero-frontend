@@ -84,7 +84,7 @@
 				type="button"
 				disabled={!device.connected || pending !== null || isMoving || isOpen}
 				onclick={() => run('open')}
-				class="border border-[#80499c] bg-neutral-800 px-3 py-1.5 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="border border-[#80499c] bg-neutral-800 px-3 py-1.5 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{pending === 'open' || shutterStatus === 2 ? 'opening' : 'open'}
 			</button>
@@ -93,7 +93,7 @@
 				type="button"
 				disabled={!device.connected || pending !== null || isMoving || isClosed}
 				onclick={() => run('close')}
-				class="border border-[#80499c] bg-neutral-800 px-3 py-1.5 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="border border-[#80499c] bg-neutral-800 px-3 py-1.5 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{pending === 'close' || shutterStatus === 3 ? 'closing' : 'close'}
 			</button>

@@ -52,6 +52,12 @@ test('the compact sequence window keeps active steps and sequential neighbors', 
 	assert.match(liveSequenceNode, /repeat \{repetition\}/);
 });
 
+test('live parallel branches divide the full available width equally', () => {
+	assert.match(liveSequenceNode, /flex w-full min-w-0 items-stretch gap-2/);
+	assert.match(liveSequenceNode, /min-w-0 flex-1 basis-0 border-x/);
+	assert.doesNotMatch(liveSequenceNode, /\bw-64 flex-none\b/);
+});
+
 test('live nodes display only non-default lifecycle hook values', () => {
 	assert.match(liveSequenceModel, /nonDefaultLiveLifecycleEntries/);
 	assert.match(liveSequenceModel, /name === 'repeat'/);

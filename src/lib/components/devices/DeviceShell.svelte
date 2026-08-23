@@ -67,7 +67,7 @@
 			type="button"
 			onclick={toggleConnection}
 			disabled={pending}
-			class="shrink-0 border px-1.5 py-0.5 font-mono text-[0.6rem] leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+			class="w-20 shrink-0 border px-1.5 py-0.5 text-center font-mono text-[0.6rem] leading-none font-black uppercase"
 			class:border-[#80499c]={device.connected}
 			class:bg-[#80499c]={device.connected}
 			class:text-neutral-50={device.connected}

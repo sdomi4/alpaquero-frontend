@@ -275,7 +275,7 @@
 						type="button"
 						disabled={pendingAction !== null || selectedStatus === 'running'}
 						onclick={() => runAction('start')}
-						class="border border-emerald-500 bg-emerald-950 px-2 py-1.5 font-black text-emerald-100 shadow-[2px_2px_0_#80499c] transition-transform hover:bg-emerald-900 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+						class="border border-emerald-500 bg-emerald-950 px-2 py-1.5 font-black text-emerald-100 shadow-[2px_2px_0_#80499c] hover:bg-emerald-900 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 					>
 						{pendingAction === 'start' ? 'Starting...' : 'Start'}
 					</button>
@@ -284,7 +284,7 @@
 						type="button"
 						disabled={pendingAction !== null || selectedStatus === 'stopped'}
 						onclick={() => runAction('stop')}
-						class="border border-yellow-400 bg-yellow-950 px-2 py-1.5 font-black text-yellow-100 shadow-[2px_2px_0_#80499c] transition-transform hover:bg-yellow-900 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+						class="border border-yellow-400 bg-yellow-950 px-2 py-1.5 font-black text-yellow-100 shadow-[2px_2px_0_#80499c] hover:bg-yellow-900 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 					>
 						{pendingAction === 'stop' ? 'Stopping...' : 'Stop'}
 					</button>
@@ -321,7 +321,7 @@
 							type="button"
 							onclick={() => setCameraControl('exposure')}
 							disabled={cameraSettingsLoading || pendingCameraControl !== null}
-							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 						>
 							{pendingCameraControl === 'exposure' ? '...' : 'Set'}
 						</button>
@@ -350,7 +350,7 @@
 							type="button"
 							onclick={() => setCameraControl('gain')}
 							disabled={cameraSettingsLoading || pendingCameraControl !== null}
-							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 						>
 							{pendingCameraControl === 'gain' ? '...' : 'Set'}
 						</button>
@@ -373,7 +373,7 @@
 							type="button"
 							onclick={() => setCameraControl('cooler_on')}
 							disabled={cameraSettingsLoading || pendingCameraControl !== null}
-							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 						>
 							{pendingCameraControl === 'cooler_on' ? '...' : 'Set'}
 						</button>
@@ -392,7 +392,7 @@
 							type="button"
 							onclick={() => setCameraControl('target_temp')}
 							disabled={cameraSettingsLoading || pendingCameraControl !== null}
-							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 						>
 							{pendingCameraControl === 'target_temp' ? '...' : 'Set'}
 						</button>
@@ -414,7 +414,7 @@
 							type="button"
 							onclick={() => setCameraControl('flip')}
 							disabled={cameraSettingsLoading || pendingCameraControl !== null}
-							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+							class="border border-[#80499c] bg-neutral-800 px-2 py-1 font-black text-neutral-100 shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 						>
 							{pendingCameraControl === 'flip' ? '...' : 'Set'}
 						</button>

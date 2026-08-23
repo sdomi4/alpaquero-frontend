@@ -166,22 +166,22 @@
 	<div class="grid gap-2">
 		<div class="grid grid-cols-2 gap-1.5 font-mono xl:grid-cols-5">
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
-				<p class="text-[0.6rem] uppercase text-neutral-400">Temp</p>
-				<p class="truncate text-sm font-black leading-none">
+				<p class="text-[0.6rem] text-neutral-400 uppercase">Temp</p>
+				<p class="truncate text-sm leading-none font-black">
 					{formatNumber(displayState.temperature)} C
 				</p>
 			</div>
 
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
-				<p class="text-[0.6rem] uppercase text-neutral-400">Target</p>
-				<p class="truncate text-sm font-black leading-none">
+				<p class="text-[0.6rem] text-neutral-400 uppercase">Target</p>
+				<p class="truncate text-sm leading-none font-black">
 					{formatNumber(displayState.targetTemperature)} C
 				</p>
 			</div>
 
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
-				<p class="text-[0.6rem] uppercase text-neutral-400">Cooler</p>
-				<p class="truncate text-sm font-black leading-none">
+				<p class="text-[0.6rem] text-neutral-400 uppercase">Cooler</p>
+				<p class="truncate text-sm leading-none font-black">
 					{formatPercent(displayState.coolerPower)}
 				</p>
 			</div>
@@ -191,15 +191,15 @@
 				class:border-yellow-300={displayState.exposing === true}
 				class:border-neutral-700={displayState.exposing !== true}
 			>
-				<p class="text-[0.6rem] uppercase text-neutral-400">Exposure</p>
-				<p class="truncate text-sm font-black uppercase leading-none">
+				<p class="text-[0.6rem] text-neutral-400 uppercase">Exposure</p>
+				<p class="truncate text-sm leading-none font-black uppercase">
 					{formatBoolean(displayState.exposing, 'active', 'idle')}
 				</p>
 			</div>
 
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
-				<p class="text-[0.6rem] uppercase text-neutral-400">Done</p>
-				<p class="truncate text-sm font-black leading-none">
+				<p class="text-[0.6rem] text-neutral-400 uppercase">Done</p>
+				<p class="truncate text-sm leading-none font-black">
 					{formatPercent(progressPercent)}
 				</p>
 			</div>
@@ -209,7 +209,7 @@
 			<div class="grid gap-2 border border-neutral-700 bg-neutral-900 p-2">
 				<div class="grid grid-cols-4 gap-1.5">
 					<label class="min-w-0">
-						<span class="text-[0.6rem] uppercase text-neutral-400">Exposure s</span>
+						<span class="text-[0.6rem] text-neutral-400 uppercase">Exposure s</span>
 						<input
 							type="number"
 							min="0.001"
@@ -221,7 +221,7 @@
 					</label>
 
 					<label class="min-w-0">
-						<span class="text-[0.6rem] uppercase text-neutral-400">Bin X</span>
+						<span class="text-[0.6rem] text-neutral-400 uppercase">Bin X</span>
 						<input
 							type="number"
 							min="1"
@@ -233,7 +233,7 @@
 					</label>
 
 					<label class="min-w-0">
-						<span class="text-[0.6rem] uppercase text-neutral-400">Bin Y</span>
+						<span class="text-[0.6rem] text-neutral-400 uppercase">Bin Y</span>
 						<input
 							type="number"
 							min="1"
@@ -245,7 +245,7 @@
 					</label>
 
 					<label class="min-w-0">
-						<span class="text-[0.6rem] uppercase text-neutral-400">Suffix</span>
+						<span class="text-[0.6rem] text-neutral-400 uppercase">Suffix</span>
 						<input
 							type="text"
 							list={`suffix-presets-${device.id}`}
@@ -268,16 +268,18 @@
 					type="button"
 					disabled={!canCommand}
 					onclick={() => run('capture')}
-					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black uppercase text-neutral-100 shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'capture' ? 'capturing' : 'capture'}
 				</button>
 			</div>
 
 			<div class="grid grid-cols-2 gap-2 font-mono">
-				<div class="grid grid-cols-[1fr_auto] items-end gap-2 border border-neutral-700 bg-neutral-900 p-2">
+				<div
+					class="grid grid-cols-[1fr_auto] items-end gap-2 border border-neutral-700 bg-neutral-900 p-2"
+				>
 					<label class="min-w-0">
-						<span class="text-[0.6rem] uppercase text-neutral-400">Set temp C</span>
+						<span class="text-[0.6rem] text-neutral-400 uppercase">Set temp C</span>
 						<input
 							type="number"
 							step="0.5"
@@ -291,7 +293,7 @@
 						type="button"
 						disabled={!canCommand}
 						onclick={() => run('temperature')}
-						class="border border-[#80499c] bg-neutral-800 px-3 py-1.5 text-sm font-black uppercase text-neutral-100 shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+						class="border border-[#80499c] bg-neutral-800 px-3 py-1.5 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 					>
 						{pending === 'temperature' ? 'setting' : 'set'}
 					</button>
@@ -299,7 +301,7 @@
 
 				<div class="grid content-center gap-1 border border-neutral-700 bg-neutral-900 p-2">
 					<div class="flex items-center justify-between gap-2 font-mono">
-						<span class="text-[0.6rem] uppercase text-neutral-400">Progress</span>
+						<span class="text-[0.6rem] text-neutral-400 uppercase">Progress</span>
 						<span class="text-xs font-black">{formatPercent(progressPercent)}</span>
 					</div>
 
@@ -307,7 +309,9 @@
 						<div class="h-full bg-[#80499c]" style:width={`${progressPercent}%`}></div>
 					</div>
 
-					<div class="flex items-center justify-between gap-2 text-[0.6rem] uppercase text-neutral-500">
+					<div
+						class="flex items-center justify-between gap-2 text-[0.6rem] text-neutral-500 uppercase"
+					>
 						<span>last {formatUtcTime(exposureStartTimeUtc)}</span>
 						<span>dur {formatDuration(exposureDuration)}</span>
 					</div>

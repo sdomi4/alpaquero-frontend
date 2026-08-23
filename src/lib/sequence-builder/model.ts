@@ -164,6 +164,11 @@ type ParentLocation = {
 	index: number;
 };
 
+export type PasteBlockResult = {
+	document: SequenceDocument;
+	pastedNodeId: string | null;
+};
+
 function findParent(node: SequenceBlock, nodeId: string): ParentLocation | null {
 	if (node.type !== 'sequence' && node.type !== 'parallel') return null;
 
@@ -178,6 +183,79 @@ function findParent(node: SequenceBlock, nodeId: string): ParentLocation | null 
 	return null;
 }
 
+function cloneYamlValue(value: YamlValue): YamlValue {
+	if (Array.isArray(value)) return value.map(cloneYamlValue);
+	if (value && typeof value === 'object') {
+		return Object.fromEntries(
+			Object.entries(value).map(([key, child]) => [key, cloneYamlValue(child)])
+		);
+	}
+	return value;
+}
+
+function cloneExtraFields(node: SequenceBlock) {
+	return node.extra
+		? Object.fromEntries(
+				Object.entries(node.extra).map(([key, value]) => [key, cloneYamlValue(value)])
+			)
+		: undefined;
+}
+
+function cloneBlockWithFreshIds(node: SequenceBlock): SequenceBlock {
+	const extra = cloneExtraFields(node);
+
+	if (node.type === 'action') {
+		return {
+			...node,
+			id: createId('action'),
+			args: Object.fromEntries(
+				Object.entries(node.args).map(([key, value]) => [key, cloneYamlValue(value)])
+			),
+			...(extra ? { extra } : {})
+		};
+	}
+
+	if (node.type === 'pause') {
+		return {
+			...node,
+			id: createId('pause'),
+			...(extra ? { extra } : {})
+		};
+	}
+
+	return {
+		...node,
+		id: createId(node.type),
+		children: node.children.map(cloneBlockWithFreshIds),
+		...(extra ? { extra } : {})
+	};
+}
+
+export function pasteBlock(
+	document: SequenceDocument,
+	copiedNode: SequenceBlock,
+	selectedNodeId: string | null
+): PasteBlockResult {
+	const block = cloneBlockWithFreshIds(copiedNode);
+	const selectedNode = selectedNodeId ? findNode(document.root, selectedNodeId) : null;
+	let next: SequenceDocument;
+
+	if (!selectedNode) {
+		next = insertBlock(document, document.root.id, document.root.children.length, block);
+	} else if (selectedNode.type === 'sequence') {
+		next = insertBlock(document, selectedNode.id, selectedNode.children.length, block);
+	} else if (selectedNode.type === 'parallel') {
+		next = insertParallelBranch(document, selectedNode.id, selectedNode.children.length, block);
+	} else {
+		const parent = findParent(document.root, selectedNode.id);
+		if (!parent) return { document, pastedNodeId: null };
+		next = insertBlock(document, parent.parentId, parent.index + 1, block);
+	}
+
+	return next === document
+		? { document, pastedNodeId: null }
+		: { document: next, pastedNodeId: block.id };
+}
 function containsNode(node: SequenceBlock, nodeId: string): boolean {
 	if (node.id === nodeId) return true;
 	return childNodes(node).some((child) => containsNode(child, nodeId));

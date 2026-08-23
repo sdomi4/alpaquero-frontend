@@ -130,7 +130,7 @@
 				type="button"
 				disabled={controlsDisabled}
 				onclick={moveAbsolute}
-				class="border border-[#80499c] bg-neutral-800 px-3 text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="border border-[#80499c] bg-neutral-800 px-3 text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>move</button
 			>
 		</div>
@@ -141,7 +141,7 @@
 				aria-label="Nudge focus inward"
 				disabled={controlsDisabled}
 				onclick={() => nudge(-1)}
-				class="border border-[#80499c] bg-neutral-800 px-3 text-lg font-black shadow-[2px_2px_0_#80499c] disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="border border-[#80499c] bg-neutral-800 px-3 text-lg font-black shadow-[2px_2px_0_#80499c] disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>−</button
 			>
 			<label class="border border-neutral-700 bg-neutral-900 px-2 py-1">
@@ -161,7 +161,7 @@
 				aria-label="Nudge focus outward"
 				disabled={controlsDisabled}
 				onclick={() => nudge(1)}
-				class="border border-[#80499c] bg-neutral-800 px-3 text-lg font-black shadow-[2px_2px_0_#80499c] disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="border border-[#80499c] bg-neutral-800 px-3 text-lg font-black shadow-[2px_2px_0_#80499c] disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>+</button
 			>
 			<button

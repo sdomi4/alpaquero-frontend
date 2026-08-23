@@ -196,7 +196,7 @@
 				type="button"
 				disabled={!device.connected || calibratorPending !== null}
 				onclick={() => setCalibrator('on')}
-				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{#if calibratorPending === 'on'}
 					setting
@@ -211,7 +211,7 @@
 				type="button"
 				disabled={!device.connected || calibratorPending !== null || calibratorOff}
 				onclick={() => setCalibrator('off')}
-				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{calibratorPending === 'off' ? 'stopping' : 'cal off'}
 			</button>
@@ -220,7 +220,7 @@
 				type="button"
 				disabled={!device.connected || coverPending !== null || coverMoving || coverOpen}
 				onclick={() => runCover('open')}
-				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{coverPending === 'open' || coverMoving ? 'opening' : 'open'}
 			</button>
@@ -229,7 +229,7 @@
 				type="button"
 				disabled={!device.connected || coverPending !== null || coverMoving || coverClosed}
 				onclick={() => runCover('close')}
-				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{coverPending === 'close' || coverMoving ? 'closing' : 'close'}
 			</button>

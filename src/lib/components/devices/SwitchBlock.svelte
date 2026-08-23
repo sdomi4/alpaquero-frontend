@@ -140,9 +140,7 @@
 				No switch controls reported.
 			</div>
 		{:else}
-			<div
-				class="grid max-h-full grid-cols-[repeat(3,max-content)] gap-1.5 overflow-y-auto pr-1"
-			>
+			<div class="grid max-h-full grid-cols-[repeat(3,max-content)] gap-1.5 overflow-y-auto pr-1">
 				{#each controls as control (control.id)}
 					{@const value = valueFor(control)}
 					{@const active = value > 0}
@@ -152,7 +150,7 @@
 							type="button"
 							disabled={pending !== null || !control.writeable}
 							onclick={() => setControl(control, active ? 0 : 1)}
-							class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border px-2 py-1.5 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+							class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border px-2 py-1.5 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 							class:border-[#80499c]={active}
 							class:bg-[#80499c]={active}
 							class:text-neutral-50={active}
@@ -187,7 +185,7 @@
 									type="button"
 									disabled={pending !== null || !control.writeable}
 									onclick={() => setControl(control, value)}
-									class="border border-[#80499c] bg-neutral-800 px-2 py-1 text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:text-neutral-600 disabled:shadow-none"
+									class="border border-[#80499c] bg-neutral-800 px-2 py-1 text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:text-neutral-600"
 								>
 									set
 								</button>

@@ -116,6 +116,13 @@ test('the sequence builder exposes reliable sequence and parallel drop targets',
 	assert.match(sequenceBuilder, /Feedback\.configure\(\{ dropAnimation: null \}\)/);
 });
 
+test('parallel builder branches divide all space left beside the new-branch drop target', () => {
+	assert.match(blockNode, /flex w-full min-w-0 items-stretch gap-2/);
+	assert.match(parallelBranchDropTarget, /min-w-0 flex-1 basis-0/);
+	assert.doesNotMatch(parallelBranchDropTarget, /\bw-64\b/);
+	assert.match(parallelNewBranchDropZone, /\bw-20 shrink-0\b/);
+});
+
 test('device actions expose a prominent editable dropdown control', () => {
 	assert.match(sequenceBuilder, /Open configured device options/);
 	assert.match(sequenceBuilder, /deviceInput\.showPicker\(\)/);
@@ -148,9 +155,25 @@ test('blocks use their full card as the selection target without calculated dura
 });
 
 test('the delete key invokes the selected block delete action outside editable controls', () => {
-	assert.match(sequenceBuilder, /<svelte:window onkeydown=\{handleDeleteKey\} \/>/);
+	assert.match(sequenceBuilder, /<svelte:window onkeydown=\{handleBuilderKey\}/);
 	assert.match(sequenceBuilder, /event\.key !== 'Delete'/);
 	assert.match(sequenceBuilder, /target\.closest\('input, textarea, select'\)/);
 	assert.match(sequenceBuilder, /deleteSelected\(\)/);
 	assert.match(sequenceBuilder, /onclick=\{deleteSelected\}/);
+});
+
+test('the sequence builder supports copy and context-aware paste shortcuts', () => {
+	assert.match(sequenceBuilder, /\(event\.ctrlKey \|\| event\.metaKey\)/);
+	assert.match(sequenceBuilder, /key === 'c'/);
+	assert.match(sequenceBuilder, /copiedNode = selectedNode/);
+	assert.match(sequenceBuilder, /key === 'v'/);
+	assert.match(sequenceBuilder, /pasteBlock\(document, copiedNode, selectedId\)/);
+	assert.match(sequenceBuilder, /onclick=\{copySelected\}/);
+	assert.match(sequenceBuilder, /disabled=\{!selectedNode\}/);
+	assert.match(sequenceBuilder, />\s*Copy\s*</);
+	assert.match(sequenceBuilder, /onclick=\{pasteCopied\}/);
+	assert.match(sequenceBuilder, /disabled=\{!copiedNode\}/);
+	assert.match(sequenceBuilder, />\s*Paste\s*</);
+	assert.match(sequenceBuilder, /onclick=\{deselectFromCanvas\}/);
+	assert.match(sequenceBuilder, /data-sequence-canvas/);
 });

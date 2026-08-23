@@ -727,7 +727,7 @@
 			<a
 				href={resolve('/sequences/new')}
 				data-control
-				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 transition-transform hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px]"
+				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 hover:bg-[#2f1c39]"
 			>
 				Builder
 			</a>
@@ -735,7 +735,7 @@
 			<a
 				href={resolve('/pinpoint')}
 				data-control
-				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 transition-transform hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px]"
+				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-purple-100 hover:bg-[#2f1c39]"
 			>
 				Pinpoint
 			</a>
@@ -803,7 +803,7 @@
 								onclick={() => {
 									activeControlTab = tab.id;
 								}}
-								class="border px-2 py-1 font-mono text-[0.65rem] leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+								class="border px-2 py-1 font-mono text-[0.65rem] leading-none font-black uppercase"
 								class:border-[#80499c]={tab.id === activeControlTabModel?.id}
 								class:bg-[#80499c]={tab.id === activeControlTabModel?.id}
 								class:text-neutral-50={tab.id === activeControlTabModel?.id}
@@ -840,7 +840,7 @@
 						title={item.title}
 						disabled={observatoryActionPending !== null}
 						onclick={() => handleObservatoryAction(item.action)}
-						class="grid size-12 place-items-center border-2 font-mono text-[0.6rem] leading-none font-black uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+						class="grid size-12 place-items-center border-2 font-mono text-[0.6rem] leading-none font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-wait disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 						class:border-emerald-400={item.tone === 'start'}
 						class:bg-emerald-950={item.tone === 'start'}
 						class:text-emerald-100={item.tone === 'start'}

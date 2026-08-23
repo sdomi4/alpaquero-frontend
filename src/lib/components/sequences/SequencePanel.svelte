@@ -85,14 +85,14 @@
 			<a
 				href={resolve('/sequences/new')}
 				data-control
-				class="border border-[#80499c] bg-[#211428] px-2 py-0.5 font-mono text-[0.65rem] font-black text-purple-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-[#2f1c39] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+				class="border border-[#80499c] bg-[#211428] px-2 py-0.5 font-mono text-[0.65rem] font-black text-purple-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-[#2f1c39]"
 			>
 				new
 			</a>
 			<button
 				type="button"
 				onclick={() => uploadDialog?.showModal()}
-				class="border border-[#80499c] bg-neutral-800 px-2 py-0.5 font-mono text-[0.65rem] font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+				class="border border-[#80499c] bg-neutral-800 px-2 py-0.5 font-mono text-[0.65rem] font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700"
 			>
 				upload
 			</button>
@@ -120,7 +120,7 @@
 									href={sequenceEditorHref(sequence)}
 									data-control
 									aria-label={`Edit sequence ${sequence}`}
-									class="border border-sky-700 bg-sky-950 px-2 py-0.5 font-mono text-[0.65rem] font-black text-sky-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-sky-900 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+									class="border border-sky-700 bg-sky-950 px-2 py-0.5 font-mono text-[0.65rem] font-black text-sky-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-sky-900"
 								>
 									edit
 								</a>
@@ -128,7 +128,7 @@
 									type="button"
 									disabled={pending === `start:${sequence}`}
 									onclick={() => start(sequence)}
-									class="border border-neutral-500 bg-neutral-800 px-2 py-0.5 font-mono text-[0.65rem] font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:text-neutral-500 disabled:shadow-none"
+									class="w-24 border border-neutral-500 bg-neutral-800 px-2 py-0.5 text-center font-mono text-[0.65rem] font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-wait disabled:text-neutral-500"
 								>
 									{pending === `start:${sequence}` ? 'starting' : 'start'}
 								</button>
@@ -187,7 +187,7 @@
 			type="button"
 			disabled={!selectedFile || pending === 'upload'}
 			onclick={submitUpload}
-			class="border border-[#80499c] bg-neutral-800 px-3 py-2 font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+			class="border border-[#80499c] bg-neutral-800 px-3 py-2 font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 		>
 			{pending === 'upload' ? 'uploading' : 'throw yaml at parser'}
 		</button>

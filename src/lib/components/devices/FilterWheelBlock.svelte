@@ -91,7 +91,7 @@
 				type="button"
 				disabled={!device.connected || pending || currentPosition === -1}
 				onclick={() => moveToPosition(targetPosition)}
-				class="border border-[#80499c] bg-neutral-800 px-3 py-1 font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+				class="w-24 border border-[#80499c] bg-neutral-800 px-3 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{pending || currentPosition === -1 ? 'moving' : 'move'}
 			</button>
@@ -105,7 +105,7 @@
 					type="button"
 					disabled={!device.connected || pending || currentPosition === -1}
 					onclick={() => moveToPosition(position)}
-					class="min-w-0 border px-1.5 py-1 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:border-[#80499c] hover:bg-neutral-800 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:hover:bg-neutral-950"
+					class="min-w-0 border px-1.5 py-1 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:border-[#80499c] hover:bg-neutral-800 disabled:cursor-not-allowed disabled:border-neutral-800 disabled:text-neutral-600 disabled:hover:bg-neutral-950"
 					class:border-[#80499c]={position === currentPosition}
 					class:bg-[#80499c]={position === currentPosition}
 					class:text-neutral-50={position === currentPosition}

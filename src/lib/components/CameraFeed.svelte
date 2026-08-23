@@ -97,7 +97,7 @@
 			onclick={() => {
 				activeId = SEQUENCE_TAB_ID;
 			}}
-			class="shrink-0 border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+			class="shrink-0 border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase"
 			class:border-[#80499c]={showingSequence}
 			class:bg-[#80499c]={showingSequence}
 			class:text-neutral-50={showingSequence}
@@ -117,7 +117,7 @@
 						onclick={() => {
 							activeId = feed.id;
 						}}
-						class="border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+						class="border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase"
 						class:border-[#80499c]={feed.id === activeFeed?.id}
 						class:bg-[#80499c]={feed.id === activeFeed?.id}
 						class:text-neutral-50={feed.id === activeFeed?.id}
@@ -136,7 +136,7 @@
 				onclick={() => {
 					activeId = PREVIEWS_TAB_ID;
 				}}
-				class="border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase transition-transform active:translate-x-[1px] active:translate-y-[1px]"
+				class="border px-3 py-1.5 font-mono text-xs leading-none font-black uppercase"
 				class:border-[#80499c]={showingPreviews}
 				class:bg-[#80499c]={showingPreviews}
 				class:text-neutral-50={showingPreviews}
@@ -193,7 +193,7 @@
 									<button
 										type="button"
 										onclick={() => openPreview(preview)}
-										class="border border-[#80499c] bg-[#211428] px-2 py-1 font-mono text-[0.65rem] font-black text-purple-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-[#2b1934] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+										class="border border-[#80499c] bg-[#211428] px-2 py-1 font-mono text-[0.65rem] font-black text-purple-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-[#2b1934]"
 									>
 										Enlarge
 									</button>
@@ -261,7 +261,7 @@
 				<button
 					type="button"
 					onclick={closePreview}
-					class="grid size-9 place-items-center border border-neutral-600 bg-neutral-950 font-mono text-sm font-black text-neutral-200 uppercase transition-transform hover:bg-neutral-800 active:translate-x-[1px] active:translate-y-[1px]"
+					class="grid size-9 place-items-center border border-neutral-600 bg-neutral-950 font-mono text-sm font-black text-neutral-200 uppercase hover:bg-neutral-800"
 					aria-label="Close full size preview"
 				>
 					X

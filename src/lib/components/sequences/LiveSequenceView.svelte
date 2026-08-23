@@ -131,7 +131,7 @@
 				onclick={() => {
 					showAll = !showAll;
 				}}
-				class="shrink-0 border border-neutral-600 bg-neutral-950 px-2.5 py-1 font-mono text-[0.65rem] font-black text-neutral-300 uppercase hover:bg-neutral-800"
+				class="w-28 shrink-0 border border-neutral-600 bg-neutral-950 px-2.5 py-1 text-center font-mono text-[0.65rem] font-black text-neutral-300 uppercase hover:bg-neutral-800"
 				aria-pressed={showAll}
 			>
 				{showAll ? 'Active window' : 'Show all'}

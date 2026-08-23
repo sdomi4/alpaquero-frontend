@@ -17,10 +17,10 @@ body {
 
 /*
  * Controls sit above the observatory's read-only badges and panels.
- * Keep panel/component shadows local to their components; this stronger,
- * two-step shadow is reserved for things the operator can press.
+ * Keep their footprint and two-step shadow stable across every interaction
+ * state so disabling a pending control cannot reflow its neighbors.
  */
-button:not(:disabled):not([data-shadowless]),
+button:not([data-shadowless]),
 a[data-control] {
 	margin-inline-end: 0.1875rem;
 	margin-block-end: 0.1875rem;
@@ -28,23 +28,22 @@ a[data-control] {
 		4px 4px 0 #a855f7,
 		7px 7px 0 rgb(76 29 149 / 55%);
 	transition:
-		transform 100ms ease,
 		box-shadow 100ms ease,
 		background-color 100ms ease,
-		border-color 100ms ease;
+		border-color 100ms ease,
+		color 100ms ease;
 }
 
-button:not(:disabled):not([data-shadowless]):hover,
-a[data-control]:hover {
-	transform: translate(-1px, -1px);
-	box-shadow:
-		5px 5px 0 #c084fc,
-		8px 8px 0 rgb(76 29 149 / 60%);
-}
-
-button:not(:disabled):not([data-shadowless]):active,
+/* Interaction states must never change a control's position or footprint. */
+button:not([data-allow-motion]):hover,
+button:not([data-allow-motion]):active,
+a[data-control]:hover,
 a[data-control]:active {
-	transform: translate(3px, 3px);
+	transform: none;
+}
+
+button:not([data-shadowless]):not([data-allow-motion]):active,
+a[data-control]:active {
 	box-shadow: 1px 1px 0 #a855f7;
 }
 
@@ -55,7 +54,7 @@ a[data-control]:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	button:not(:disabled):not([data-shadowless]),
+	button:not([data-shadowless]),
 	a[data-control] {
 		transition: none;
 	}

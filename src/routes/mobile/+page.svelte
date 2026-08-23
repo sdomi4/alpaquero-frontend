@@ -637,7 +637,7 @@
 									title={item.title}
 									disabled={observatoryActionPending !== null}
 									onclick={() => handleObservatoryAction(item.action)}
-									class="min-h-16 border-2 font-mono text-xs leading-none font-black uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+									class="min-h-16 border-2 font-mono text-xs leading-none font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-wait disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 									class:border-emerald-400={item.tone === 'start'}
 									class:bg-emerald-950={item.tone === 'start'}
 									class:text-emerald-100={item.tone === 'start'}
@@ -731,22 +731,5 @@
 		box-shadow:
 			4px 4px 0 #a855f7,
 			7px 7px 0 rgb(76 29 149 / 55%);
-		transition:
-			transform 100ms ease,
-			box-shadow 100ms ease;
-	}
-
-	.mobile-control-select:hover,
-	.mobile-control-select:focus-within {
-		transform: translate(-1px, -1px);
-		box-shadow:
-			5px 5px 0 #c084fc,
-			8px 8px 0 rgb(76 29 149 / 60%);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.mobile-control-select {
-			transition: none;
-		}
 	}
 </style>

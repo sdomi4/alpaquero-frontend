@@ -98,7 +98,7 @@
 							onclick={() => togglePause(sequence)}
 							disabled={pending?.endsWith(sequence.context_id)}
 							aria-label={`${sequence.status.toLowerCase() === 'paused' ? 'Resume' : 'Pause'} sequence ${sequence.sequence_name}`}
-							class="border border-neutral-500 bg-neutral-800 px-1.5 py-1 text-[0.6rem] leading-none font-black uppercase shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:text-neutral-500 disabled:shadow-none"
+							class="w-20 border border-neutral-500 bg-neutral-800 px-1.5 py-1 text-center text-[0.6rem] leading-none font-black uppercase shadow-[1px_1px_0_#80499c] hover:bg-neutral-700 disabled:cursor-wait disabled:text-neutral-500"
 						>
 							{sequence.status.toLowerCase() === 'paused' ? 'resume' : 'pause'}
 						</button>
@@ -108,7 +108,7 @@
 							onclick={() => abort(sequence)}
 							disabled={pending?.endsWith(sequence.context_id)}
 							aria-label={`Abort sequence ${sequence.sequence_name}`}
-							class="border border-red-400 bg-red-950 px-1.5 py-1 text-[0.6rem] leading-none font-black text-red-100 uppercase shadow-[1px_1px_0_#80499c] hover:bg-red-900 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-wait disabled:text-neutral-500 disabled:shadow-none"
+							class="border border-red-400 bg-red-950 px-1.5 py-1 text-[0.6rem] leading-none font-black text-red-100 uppercase shadow-[1px_1px_0_#80499c] hover:bg-red-900 disabled:cursor-wait disabled:text-neutral-500"
 						>
 							abort
 						</button>

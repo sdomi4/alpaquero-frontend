@@ -26,6 +26,7 @@
 		moveBlockToNewParallelBranch,
 		moveBlockToParallelBranch,
 		nodeLabel,
+		pasteBlock,
 		removeBlock,
 		updateBlock,
 		validateSequence
@@ -71,6 +72,7 @@
 	let operationMessage = $state<string | null>(null);
 	let operationError = $state<string | null>(null);
 	let deviceInput = $state<HTMLInputElement | null>(null);
+	let copiedNode = $state<SequenceBlock | null>(null);
 	const dragDropPlugins = defaultPreset.plugins.map((plugin) =>
 		plugin === Feedback ? Feedback.configure({ dropAnimation: null }) : plugin
 	);
@@ -83,7 +85,7 @@
 			new Set([...(refreshedSequenceNames ?? data.sequences ?? []), ...savedSequenceNames])
 		).sort((a, b) => a.localeCompare(b))
 	);
-	const selectedNode = $derived(findNode(document.root, selectedId ?? document.root.id));
+	const selectedNode = $derived(selectedId ? findNode(document.root, selectedId) : null);
 	const selectedActionDefinition = $derived(
 		selectedNode?.type === 'action'
 			? (actions.find((action) => action.name === selectedNode.action) ?? null)
@@ -359,20 +361,61 @@
 		applyDocument(removeBlock(document, selectedNode.id), document.root.id);
 	}
 
-	function handleDeleteKey(event: KeyboardEvent) {
-		if (event.key !== 'Delete' || event.defaultPrevented) return;
+	function copySelected() {
+		if (!selectedNode) return false;
+		copiedNode = selectedNode;
+		return true;
+	}
 
+	function pasteCopied() {
+		if (!copiedNode) return false;
+
+		const result = pasteBlock(document, copiedNode, selectedId);
+		if (!result.pastedNodeId) return false;
+
+		applyDocument(result.document, result.pastedNodeId);
+		return true;
+	}
+
+	function targetsEditableControl(event: KeyboardEvent) {
 		const target = event.target;
-		if (
+		return (
 			target instanceof HTMLElement &&
 			(target.isContentEditable || Boolean(target.closest('input, textarea, select')))
-		) {
+		);
+	}
+
+	function handleBuilderKey(event: KeyboardEvent) {
+		if (event.defaultPrevented || targetsEditableControl(event)) return;
+
+		const key = event.key.toLowerCase();
+		const copyPasteShortcut = (event.ctrlKey || event.metaKey) && !event.altKey;
+		if (copyPasteShortcut && key === 'c') {
+			if (copySelected()) event.preventDefault();
 			return;
 		}
+
+		if (copyPasteShortcut && key === 'v') {
+			if (pasteCopied()) event.preventDefault();
+			return;
+		}
+
+		if (event.key !== 'Delete') return;
 		if (!selectedNode || selectedNode.id === document.root.id) return;
 
 		event.preventDefault();
 		deleteSelected();
+	}
+
+	function deselectFromCanvas(event: MouseEvent) {
+		const target = event.target;
+		if (
+			target instanceof HTMLElement &&
+			target.closest('[data-sequence-canvas]') &&
+			!target.closest('[data-block-id]')
+		) {
+			selectedId = null;
+		}
 	}
 
 	function selectFirstIssue() {
@@ -513,7 +556,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleDeleteKey} />
+<svelte:window onkeydown={handleBuilderKey} onclick={deselectFromCanvas} />
 
 <svelte:head>
 	<title>Sequence Builder | Alpaquero</title>
@@ -562,6 +605,24 @@
 			</button>
 			<button
 				type="button"
+				onclick={copySelected}
+				disabled={!selectedNode}
+				class="border border-neutral-600 bg-neutral-950 px-2 py-1.5 text-[0.65rem] font-black uppercase hover:border-neutral-300 disabled:cursor-not-allowed disabled:text-neutral-700"
+				title="Copy selected node (Ctrl+C)"
+			>
+				Copy
+			</button>
+			<button
+				type="button"
+				onclick={pasteCopied}
+				disabled={!copiedNode}
+				class="border border-neutral-600 bg-neutral-950 px-2 py-1.5 text-[0.65rem] font-black uppercase hover:border-neutral-300 disabled:cursor-not-allowed disabled:text-neutral-700"
+				title="Paste copied node (Ctrl+V)"
+			>
+				Paste
+			</button>
+			<button
+				type="button"
 				onclick={selectFirstIssue}
 				class="border border-neutral-600 bg-neutral-950 px-2 py-1.5 text-[0.65rem] font-black uppercase hover:border-[#80499c]"
 			>
@@ -574,7 +635,7 @@
 				title={errorCount > 0
 					? 'Resolve validation errors before saving'
 					: 'Validate and register YAML in the backend’s in-memory sequence catalog'}
-				class="border border-[#80499c] bg-[#211428] px-3 py-1.5 text-[0.65rem] font-black text-purple-200 uppercase hover:bg-[#392044] disabled:cursor-not-allowed disabled:opacity-50"
+				class="w-20 border border-[#80499c] bg-[#211428] px-3 py-1.5 text-[0.65rem] font-black text-purple-200 uppercase hover:bg-[#392044] disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{isSaving ? 'Saving…' : 'Save'}
 			</button>
@@ -764,7 +825,7 @@
 			<section
 				class="flex min-h-0 min-w-0 flex-col overflow-hidden border-2 border-neutral-700 bg-neutral-900 shadow-[4px_4px_0_#80499c]"
 			>
-				<div class="min-h-0 flex-1 overflow-auto bg-neutral-950/80 p-4">
+				<div class="min-h-0 flex-1 overflow-auto bg-neutral-950/80 p-4" data-sequence-canvas>
 					<div class="mx-auto max-w-6xl min-w-[42rem]">
 						<BlockNode
 							node={document.root}

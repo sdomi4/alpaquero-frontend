@@ -162,9 +162,9 @@
 		</div>
 	{:else if node.type === 'ParallelGroup' && visibleChildren.length > 0}
 		<div class="overflow-x-auto p-2">
-			<div class="flex min-w-max items-stretch gap-2">
+			<div class="flex w-full min-w-0 items-stretch gap-2">
 				{#each visibleChildren as child (child.id)}
-					<div class="w-64 flex-none border-x border-fuchsia-800/60 p-1">
+					<div class="min-w-0 flex-1 basis-0 border-x border-fuchsia-800/60 p-1">
 						<LiveSequenceNode node={child} {activeSteps} {visibleNodeIds} {showAll} />
 					</div>
 				{/each}

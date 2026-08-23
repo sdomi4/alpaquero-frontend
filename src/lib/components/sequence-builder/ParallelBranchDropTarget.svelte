@@ -33,7 +33,7 @@
 	data-parallel-id={parallelId}
 	data-parallel-branch-id={branchId}
 	data-parallel-branch-index={index}
-	class="relative flex min-h-28 w-64 shrink-0 flex-col border border-transparent transition-colors"
+	class="relative flex min-h-28 min-w-0 flex-1 basis-0 flex-col border border-transparent transition-colors"
 	class:border-fuchsia-400={droppable.isDropTarget}
 	class:bg-fuchsia-950={droppable.isDropTarget}
 >

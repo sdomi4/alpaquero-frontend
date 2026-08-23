@@ -180,7 +180,7 @@
 					type="button"
 					disabled={!canCommand}
 					onclick={() => run('slew')}
-					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'slew' ? 'slewing' : 'slew'}
 				</button>
@@ -189,7 +189,7 @@
 					type="button"
 					disabled={!canCommand}
 					onclick={() => run('sun')}
-					class="border border-yellow-300 bg-yellow-950 px-3 py-2 text-sm font-black text-yellow-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-yellow-900 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+					class="border border-yellow-300 bg-yellow-950 px-3 py-2 text-sm font-black text-yellow-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-yellow-900 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'sun' ? 'slewing' : 'sun'}
 				</button>
@@ -198,7 +198,7 @@
 					type="button"
 					disabled={!canCommand || displayState.parked === true}
 					onclick={() => run('park')}
-					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'park' ? 'parking' : 'park'}
 				</button>
@@ -207,7 +207,7 @@
 					type="button"
 					disabled={!canCommand || displayState.parked === false}
 					onclick={() => run('unpark')}
-					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] transition-transform hover:bg-neutral-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:shadow-none"
+					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'unpark' ? 'freeing' : 'unpark'}
 				</button>

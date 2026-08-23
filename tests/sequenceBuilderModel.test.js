@@ -14,6 +14,7 @@ import {
 	moveBlockToNewParallelBranch,
 	moveBlockToParallelBranch,
 	nodeDurationSeconds,
+	pasteBlock,
 	primaryArgumentFor,
 	summarizeSequence,
 	validateSequence
@@ -147,6 +148,104 @@ test('existing blocks can append to a branch or become a new parallel branch', (
 	const newBranch = branchedParallel.type === 'parallel' ? branchedParallel.children[2] : null;
 	assert.equal(newBranch?.type, 'action');
 	assert.equal(newBranch?.id, 'after');
+});
+
+test('pasting without a selection appends a fresh copy to the root sequence', () => {
+	const document = createDocument();
+	const source = document.root.children[0];
+	const result = pasteBlock(document, source, null);
+
+	assert.ok(result.pastedNodeId);
+	assert.notEqual(result.pastedNodeId, source.id);
+	assert.deepEqual(
+		result.document.root.children.map((node) => node.id),
+		['before', 'parallel', 'after', result.pastedNodeId]
+	);
+});
+
+test('pasting on a sequence appends a deep copy with fresh descendant IDs', () => {
+	const document = createDocument();
+	const copiedSequence = createSequence('copied-sequence', 'Copied sequence', [
+		createAction('copied-action', 'Copied action', 'copied_action', 1)
+	]);
+	const result = pasteBlock(document, copiedSequence, 'branch-a');
+	const parallel = result.document.root.children[1];
+	const branch = parallel.type === 'parallel' ? parallel.children[0] : null;
+	const pasted = branch?.type === 'sequence' ? branch.children.at(-1) : null;
+
+	assert.equal(pasted?.type, 'sequence');
+	assert.equal(pasted?.id, result.pastedNodeId);
+	assert.notEqual(pasted?.id, copiedSequence.id);
+	assert.notEqual(pasted?.type === 'sequence' ? pasted.children[0].id : null, 'copied-action');
+});
+
+test('pasting on a parallel creates a new direct branch', () => {
+	const document = createDocument();
+	const copied = createPause('copied-pause', 'Copied pause');
+	const result = pasteBlock(document, copied, 'parallel');
+	const parallel = result.document.root.children[1];
+	const pasted = parallel.type === 'parallel' ? parallel.children.at(-1) : null;
+
+	assert.equal(parallel.type, 'parallel');
+	assert.equal(parallel.type === 'parallel' ? parallel.children.length : 0, 3);
+	assert.equal(pasted?.type, 'pause');
+	assert.equal(pasted?.id, result.pastedNodeId);
+});
+
+test('pasting on an action or pause inserts immediately after it with the same parent', () => {
+	const document = createDocument();
+	const pause = createPause('pause', 'Pause');
+	const withPause = insertBlock(document, 'branch-a', 1, pause);
+
+	const afterAction = pasteBlock(
+		withPause,
+		createPause('copied-pause', 'Copied pause'),
+		'action-a'
+	);
+	const firstParallel = afterAction.document.root.children[1];
+	const firstBranch = firstParallel.type === 'parallel' ? firstParallel.children[0] : null;
+	assert.deepEqual(
+		firstBranch?.type === 'sequence' ? firstBranch.children.map((node) => node.id) : [],
+		['action-a', afterAction.pastedNodeId, 'pause']
+	);
+
+	const afterPause = pasteBlock(
+		afterAction.document,
+		createAction('copied-action', 'Copied action', 'copied_action', 1),
+		'pause'
+	);
+	const secondParallel = afterPause.document.root.children[1];
+	const secondBranch = secondParallel.type === 'parallel' ? secondParallel.children[0] : null;
+	assert.deepEqual(
+		secondBranch?.type === 'sequence' ? secondBranch.children.map((node) => node.id) : [],
+		['action-a', afterAction.pastedNodeId, 'pause', afterPause.pastedNodeId]
+	);
+});
+
+test('pasting after a direct action branch keeps both blocks as direct parallel branches', () => {
+	const directAction = createAction('direct-action', 'Direct action', 'direct_action', 1);
+	const document = {
+		id: 'direct-branch-document',
+		name: 'Direct branch',
+		version: 1,
+		root: createSequence('root', 'Root', [createParallel('parallel', 'Parallel', [directAction])])
+	};
+	const result = pasteBlock(
+		document,
+		createAction('copied-action', 'Copied action', 'copied_action', 1),
+		'direct-action'
+	);
+	const parallel = result.document.root.children[0];
+
+	assert.equal(parallel.type, 'parallel');
+	assert.deepEqual(parallel.type === 'parallel' ? parallel.children.map((node) => node.type) : [], [
+		'action',
+		'action'
+	]);
+	assert.deepEqual(parallel.type === 'parallel' ? parallel.children.map((node) => node.id) : [], [
+		'direct-action',
+		result.pastedNodeId
+	]);
 });
 
 test('moving a container into its own descendant is rejected without mutation', () => {
