@@ -19,10 +19,11 @@ test('buildTelescopeCommandRequest builds RA/Dec slew requests without safety he
 	assert.deepEqual(
 		buildTelescopeCommandRequest('telescope-1', 'slew', false, { ra: 12.345, dec: -45.6 }),
 		{
-			path: '/api/observatory/telescope/telescope-1/slew/12.345/-45.6',
+			path: '/api/observatory/telescope/telescope-1/slew',
 			init: {
 				method: 'POST',
-				headers: {}
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ ra: 12.345, dec: -45.6 })
 			}
 		}
 	);
@@ -38,4 +39,17 @@ test('buildTelescopeCommandRequest builds slew-to-sun requests', () => {
 			}
 		}
 	});
+});
+
+test('slew submits raw input without client conversion or validation', () => {
+	for (const coordinates of [
+		{ ra: '18h04m20.99s', dec: '-29:31:08.9' },
+		{ ra: 'J180420.99-293108.9', dec: '' },
+		{ ra: 'invalid', dec: '91' }
+	]) {
+		const request = buildTelescopeCommandRequest('scope', 'slew', true, coordinates);
+		assert.ok(request.init.body);
+		assert.deepEqual(JSON.parse(request.init.body), coordinates);
+		assert.equal(request.init.headers['x-safety-override'], 'true');
+	}
 });

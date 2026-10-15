@@ -26,8 +26,8 @@
 
 	let { device, onLifecycleComplete }: Props = $props();
 
-	let targetRa = $state(0);
-	let targetDec = $state(0);
+	let targetRa = $state('');
+	let targetDec = $state('');
 	let safetyOverride = $state(false);
 	let pending = $state<TelescopeAction | null>(null);
 	let error = $state<string | null>(null);
@@ -35,10 +35,6 @@
 
 	const displayState = $derived(getTelescopeDisplayState(device.state));
 	const canCommand = $derived(device.connected && pending === null);
-
-	function formatNumber(value: number | null, digits = 2) {
-		return value === null ? '--' : value.toFixed(digits);
-	}
 
 	function formatBoolean(value: boolean | null, trueLabel: string, falseLabel: string) {
 		if (value === null) return '--';
@@ -59,7 +55,9 @@
 			} else if (action === 'sun') {
 				await slewTelescopeToSun(device.id, safetyOverride);
 			} else {
-				await slewTelescope(device.id, targetRa, targetDec, safetyOverride);
+				const result = await slewTelescope(device.id, targetRa, targetDec, safetyOverride);
+				targetRa = result.ra;
+				targetDec = result.dec;
 			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Telescope command failed';
@@ -100,28 +98,28 @@
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">RA</p>
 				<p class="truncate text-sm leading-none font-black">
-					{formatNumber(displayState.positionRa, 4)}
+					{displayState.positionRa ?? '--'}
 				</p>
 			</div>
 
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Dec</p>
 				<p class="truncate text-sm leading-none font-black">
-					{formatNumber(displayState.positionDec, 4)}
+					{displayState.positionDec ?? '--'}
 				</p>
 			</div>
 
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Target RA</p>
 				<p class="truncate text-sm leading-none font-black">
-					{formatNumber(displayState.targetRa, 4)}
+					{displayState.targetRa ?? '--'}
 				</p>
 			</div>
 
 			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Target Dec</p>
 				<p class="truncate text-sm leading-none font-black">
-					{formatNumber(displayState.targetDec, 4)}
+					{displayState.targetDec ?? '--'}
 				</p>
 			</div>
 
@@ -155,9 +153,12 @@
 				<label class="min-w-0">
 					<span class="text-[0.6rem] text-neutral-400 uppercase">Command RA</span>
 					<input
-						type="number"
-						step="0.0001"
+						type="text"
+						placeholder="hh:mm:ss.ss"
 						bind:value={targetRa}
+						oninput={() => {
+							targetsInitialized = true;
+						}}
 						disabled={!device.connected || pending !== null}
 						class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 					/>
@@ -166,13 +167,20 @@
 				<label class="min-w-0">
 					<span class="text-[0.6rem] text-neutral-400 uppercase">Command Dec</span>
 					<input
-						type="number"
-						step="0.0001"
+						type="text"
+						placeholder="+dd:mm:ss.ss"
 						bind:value={targetDec}
+						oninput={() => {
+							targetsInitialized = true;
+						}}
 						disabled={!device.connected || pending !== null}
 						class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 					/>
 				</label>
+				<p class="text-[0.6rem] text-neutral-400">
+					RA: hours (use d for degrees). For a coordinate pair or J designation, paste into RA and
+					leave Dec empty. Checked on Slew.
+				</p>
 			</div>
 
 			<div class="grid min-h-0 grid-cols-2 gap-1.5">

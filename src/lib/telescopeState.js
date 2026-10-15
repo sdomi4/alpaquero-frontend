@@ -1,9 +1,9 @@
 /**
  * @typedef {{
- *   positionRa: number | null;
- *   positionDec: number | null;
- *   targetRa: number | null;
- *   targetDec: number | null;
+ *   positionRa: string | null;
+ *   positionDec: string | null;
+ *   targetRa: string | null;
+ *   targetDec: string | null;
  *   parked: boolean | null;
  *   slewing: boolean | null;
  *   tracking: boolean | null;
@@ -18,10 +18,10 @@ export function getTelescopeDisplayState(state) {
 	const source = state ?? {};
 
 	return {
-		positionRa: firstNumber(source, ['position.ra', 'right_ascension', 'ra', 'RA']),
-		positionDec: firstNumber(source, ['position.dec', 'declination', 'dec', 'DEC']),
-		targetRa: firstNumber(source, ['target.ra', 'target_ra', 'targetRa']),
-		targetDec: firstNumber(source, ['target.dec', 'target_dec', 'targetDec']),
+		positionRa: firstString(source, ['position.ra', 'right_ascension', 'ra', 'RA']),
+		positionDec: firstString(source, ['position.dec', 'declination', 'dec', 'DEC']),
+		targetRa: firstString(source, ['target.ra', 'target_ra', 'targetRa']),
+		targetDec: firstString(source, ['target.dec', 'target_dec', 'targetDec']),
 		parked: firstBoolean(source, ['is_parked', 'at_park', 'parked']),
 		slewing: firstBoolean(source, ['slewing', 'is_slewing']),
 		tracking: firstBoolean(source, ['tracking', 'is_tracking'])
@@ -32,13 +32,10 @@ export function getTelescopeDisplayState(state) {
  * @param {Record<string, unknown>} source
  * @param {string[]} paths
  */
-function firstNumber(source, paths) {
+function firstString(source, paths) {
 	for (const path of paths) {
 		const value = readPath(source, path);
-		const numberValue =
-			typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
-
-		if (Number.isFinite(numberValue)) return numberValue;
+		if (typeof value === 'string' && value.length > 0) return value;
 	}
 
 	return null;

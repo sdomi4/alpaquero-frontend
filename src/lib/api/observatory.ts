@@ -172,13 +172,18 @@ async function runTelescopeCommand(
 	telescopeId: string,
 	command: 'park' | 'unpark' | 'slew' | 'sun',
 	safetyOverride = false,
-	coordinates?: { ra: number; dec: number }
+	coordinates?: { ra: string; dec: string }
 ) {
 	const request = buildTelescopeCommandRequest(telescopeId, command, safetyOverride, coordinates);
 	const res = await fetch(request.path, request.init);
 
 	if (!res.ok) {
-		throw new Error(`Telescope ${command} failed: ${res.status} ${res.statusText}`);
+		const body = await res.json().catch(() => null);
+		throw new Error(
+			typeof body?.detail === 'string'
+				? body.detail
+				: `Telescope ${command} failed: ${res.status} ${res.statusText}`
+		);
 	}
 
 	return res.json().catch(() => null);
@@ -194,8 +199,8 @@ export async function unparkTelescope(telescopeId: string, safetyOverride = fals
 
 export async function slewTelescope(
 	telescopeId: string,
-	ra: number,
-	dec: number,
+	ra: string,
+	dec: string,
 	safetyOverride = false
 ) {
 	return runTelescopeCommand(telescopeId, 'slew', safetyOverride, { ra, dec });

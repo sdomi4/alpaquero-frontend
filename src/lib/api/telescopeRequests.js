@@ -8,7 +8,7 @@ const OBSERVATORY_API_BASE = '/api/observatory';
  * @param {string} telescopeId
  * @param {TelescopeCommand} command
  * @param {boolean} [safetyOverride]
- * @param {{ ra?: number; dec?: number }} [coordinates]
+ * @param {{ ra?: string | number; dec?: string | number }} [coordinates]
  */
 export function buildTelescopeCommandRequest(
 	telescopeId,
@@ -23,11 +23,14 @@ export function buildTelescopeCommandRequest(
 		headers['x-safety-override'] = 'true';
 	}
 
+	if (command === 'slew') headers['Content-Type'] = 'application/json';
+
 	return {
-		path: `${OBSERVATORY_API_BASE}/${buildTelescopeCommandPath(telescopeId, command, coordinates)}`,
+		path: `${OBSERVATORY_API_BASE}/${buildTelescopeCommandPath(telescopeId, command)}`,
 		init: {
 			method: 'POST',
-			headers
+			headers,
+			...(command === 'slew' ? { body: JSON.stringify(coordinates) } : {})
 		}
 	};
 }
@@ -35,31 +38,15 @@ export function buildTelescopeCommandRequest(
 /**
  * @param {string} telescopeId
  * @param {TelescopeCommand} command
- * @param {{ ra?: number; dec?: number }} coordinates
  */
-function buildTelescopeCommandPath(telescopeId, command, coordinates) {
+function buildTelescopeCommandPath(telescopeId, command) {
 	const encodedId = encodeURIComponent(telescopeId);
 
-	if (command === 'slew') {
-		return `telescope/${encodedId}/slew/${formatCoordinate(coordinates.ra)}/${formatCoordinate(
-			coordinates.dec
-		)}`;
-	}
+	if (command === 'slew') return `telescope/${encodedId}/slew`;
 
 	if (command === 'sun') {
 		return `telescope/${encodedId}/slew/sun`;
 	}
 
 	return `telescope/${encodedId}/${command}`;
-}
-
-/**
- * @param {number | undefined} value
- */
-function formatCoordinate(value) {
-	if (typeof value !== 'number' || !Number.isFinite(value)) {
-		throw new Error('Telescope slew requires finite RA and Dec coordinates');
-	}
-
-	return encodeURIComponent(String(value));
 }
