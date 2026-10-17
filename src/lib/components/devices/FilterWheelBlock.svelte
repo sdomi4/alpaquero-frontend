@@ -68,14 +68,14 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid gap-1.5">
-		<div class="grid grid-cols-[auto_5rem_auto] items-stretch gap-1.5 font-mono">
-			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+	<div class="flex h-full w-80 flex-col gap-1 pb-0.5">
+		<div class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-stretch gap-1.5 font-mono">
+			<div class="border border-neutral-700 bg-neutral-900 px-2 py-0.5">
 				<span class="text-[0.65rem] text-neutral-400 uppercase">Current</span>
 				<span class="ml-2 text-sm leading-none font-black">{positionLabel}</span>
 			</div>
 
-			<label class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+			<label class="flex items-center gap-1 border border-neutral-700 bg-neutral-900 px-2 py-0.5">
 				<span class="text-[0.65rem] text-neutral-400 uppercase">Target</span>
 				<input
 					type="number"
@@ -83,7 +83,7 @@
 					max={positionCount - 1}
 					bind:value={targetPosition}
 					disabled={!device.connected || pending || currentPosition === -1}
-					class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 font-mono text-xs font-black text-neutral-100 outline-none focus:border-[#80499c]"
+					class="w-12 border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 font-mono text-xs font-black text-neutral-100 outline-none focus:border-[#80499c]"
 				/>
 			</label>
 
@@ -91,21 +91,21 @@
 				type="button"
 				disabled={!device.connected || pending || currentPosition === -1}
 				onclick={() => moveToPosition(targetPosition)}
-				class="w-24 border border-[#80499c] bg-neutral-800 px-3 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+				class="w-16 border border-[#80499c] bg-neutral-800 px-3 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{pending || currentPosition === -1 ? 'moving' : 'move'}
 			</button>
 		</div>
 
 		<div
-			class="grid max-h-[5.75rem] grid-cols-[repeat(auto-fit,minmax(6rem,1fr))] gap-1.5 overflow-y-auto pr-1"
+			class="grid min-h-0 flex-1 auto-rows-[minmax(1.5rem,1fr)] grid-cols-3 gap-1 overflow-y-auto p-0.5"
 		>
 			{#each positions as position (position)}
 				<button
 					type="button"
 					disabled={!device.connected || pending || currentPosition === -1}
 					onclick={() => moveToPosition(position)}
-					class="min-w-0 border px-1.5 py-1 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:border-[#80499c] hover:bg-neutral-800 disabled:cursor-not-allowed disabled:border-neutral-800 disabled:text-neutral-600 disabled:hover:bg-neutral-950"
+					class="flex min-w-0 items-center border px-1.5 py-1 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:border-[#80499c] hover:bg-neutral-800 disabled:cursor-not-allowed disabled:border-neutral-800 disabled:text-neutral-600 disabled:hover:bg-neutral-950"
 					class:border-[#80499c]={position === currentPosition}
 					class:bg-[#80499c]={position === currentPosition}
 					class:text-neutral-50={position === currentPosition}
@@ -113,7 +113,8 @@
 					class:text-neutral-200={position !== currentPosition}
 				>
 					<span class="mr-1 opacity-70">{position}</span>
-					<span class="truncate leading-tight">{filterNames[position] ?? `Filter ${position}`}</span
+					<span title={filterNames[position] ?? `Filter ${position}`} class="truncate leading-tight"
+						>{filterNames[position] ?? `Filter ${position}`}</span
 					>
 				</button>
 			{/each}

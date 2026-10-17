@@ -69,82 +69,82 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid h-full grid-rows-[auto_minmax(0,1fr)] gap-2">
-		<div class="grid grid-cols-2 gap-1.5 font-mono sm:grid-cols-4">
+	<div class="grid h-full grid-rows-[auto_minmax(0,1fr)] gap-1">
+		<div class="grid grid-cols-4 gap-1 font-mono">
 			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Ambient</p>
-				<p class="truncate text-base leading-none font-black">
+				<p class="truncate text-sm leading-none font-black">
 					{formatNumber(conditions.ambient)} C
 				</p>
 			</div>
 
 			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Sky</p>
-				<p class="truncate text-base leading-none font-black">
+				<p class="truncate text-sm leading-none font-black">
 					{formatNumber(conditions.skyAmbient)} C
 				</p>
 			</div>
 
 			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Humidity</p>
-				<p class="truncate text-base leading-none font-black">
+				<p class="truncate text-sm leading-none font-black">
 					{formatPercent(conditions.humidity)}
 				</p>
 			</div>
 
 			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Pressure</p>
-				<p class="truncate text-base leading-none font-black">
+				<p class="truncate text-sm leading-none font-black">
 					{formatInteger(conditions.pressure)}
 				</p>
 			</div>
 		</div>
 
-		<div class="grid min-h-0 grid-cols-1 gap-2 md:grid-cols-[minmax(12rem,0.9fr)_minmax(0,1fr)]">
+		<div class="grid min-h-0 grid-cols-2 gap-1">
 			<div class="grid content-start gap-1.5 font-mono">
 				<div
-					class="border bg-neutral-900 p-2"
+					class="border bg-neutral-900 p-1"
 					class:border-emerald-400={rainState === 'dry'}
 					class:border-red-400={rainState === 'wet'}
 					class:border-neutral-700={rainState === 'unknown'}
 				>
-					<div class="flex items-center justify-between gap-2">
+					<div class="flex items-center justify-between gap-1">
 						<p class="text-[0.6rem] text-neutral-400 uppercase">Rain</p>
 						<p class="text-xs font-black uppercase">{rainState}</p>
 					</div>
-					<p class="mt-1 text-lg leading-none font-black">{formatNumber(conditions.rain)}</p>
+					<p class="mt-1 text-sm leading-none font-black">{formatNumber(conditions.rain)}</p>
 				</div>
 
 				<div
-					class="border bg-neutral-900 p-2"
+					class="border bg-neutral-900 p-1"
 					class:border-emerald-400={dewState === 'clear'}
 					class:border-yellow-300={dewState === 'watch'}
 					class:border-red-400={dewState === 'tight'}
 					class:border-neutral-700={dewState === 'unknown'}
 				>
-					<div class="flex items-center justify-between gap-2">
+					<div class="flex items-center justify-between gap-1">
 						<p class="text-[0.6rem] text-neutral-400 uppercase">Dew Spread</p>
 						<p class="text-xs font-black uppercase">{dewState}</p>
 					</div>
-					<p class="mt-1 text-lg leading-none font-black">
+					<p class="mt-1 text-sm leading-none font-black">
 						{formatNumber(conditions.dewPointSpread)} C
 					</p>
 				</div>
 
-				<div class="border border-neutral-700 bg-neutral-900 p-2">
-					<div class="flex items-center justify-between gap-2">
+				<div class="border border-neutral-700 bg-neutral-900 p-1">
+					<div class="flex items-center justify-between gap-1">
 						<p class="text-[0.6rem] text-neutral-400 uppercase">Sky Delta</p>
 						<p class="text-xs font-black uppercase">sky - air</p>
 					</div>
-					<p class="mt-1 text-lg leading-none font-black">
+					<p class="mt-1 text-sm leading-none font-black">
 						{formatNumber(conditions.skyDelta)} C
 					</p>
 				</div>
 			</div>
 
-			<div class="grid content-start gap-2 font-mono">
-				<div class="border border-neutral-700 bg-neutral-900 p-2">
-					<div class="mb-1 flex items-center justify-between gap-2">
+			<div class="grid content-start gap-1 font-mono">
+				<div class="border border-neutral-700 bg-neutral-900 p-1">
+					<div class="mb-1 flex items-center justify-between gap-1">
 						<p class="text-[0.6rem] text-neutral-400 uppercase">Wind</p>
 						<p class="text-xs font-black uppercase">{windState}</p>
 					</div>
@@ -161,8 +161,8 @@
 					<p class="mt-1 text-xs text-neutral-300">{formatNumber(conditions.wind)} m/s</p>
 				</div>
 
-				<div class="border border-neutral-700 bg-neutral-900 p-2">
-					<div class="mb-1 flex items-center justify-between gap-2">
+				<div class="border border-neutral-700 bg-neutral-900 p-1">
+					<div class="mb-1 flex items-center justify-between gap-1">
 						<p class="text-[0.6rem] text-neutral-400 uppercase">Daylight</p>
 						<p class="text-xs font-black uppercase">{daylightState}</p>
 					</div>
@@ -178,12 +178,12 @@
 					<p class="mt-1 text-xs text-neutral-300">{formatPercent(conditions.daylight)}</p>
 				</div>
 
-				<div class="border border-neutral-700 bg-neutral-900 p-2">
-					<div class="mb-1 flex items-center justify-between gap-2">
+				<div class="border border-neutral-700 bg-neutral-900 p-1">
+					<div class="mb-1 flex items-center justify-between gap-1">
 						<p class="text-[0.6rem] text-neutral-400 uppercase">Dew Point</p>
 						<p class="text-xs font-black uppercase">temperature</p>
 					</div>
-					<p class="text-lg leading-none font-black">{formatNumber(conditions.dewPoint)} C</p>
+					<p class="text-sm leading-none font-black">{formatNumber(conditions.dewPoint)} C</p>
 				</div>
 			</div>
 		</div>

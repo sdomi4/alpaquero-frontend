@@ -548,7 +548,7 @@
 		</div>
 	</header>
 
-	<section class="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
+	<section class="mobile-panels grid min-h-0 grid-rows-[minmax(0,0.65fr)_minmax(0,1.35fr)] gap-2">
 		<div class="min-h-0">
 			<CameraFeed feeds={cameraFeeds} sequences={liveSequences} />
 		</div>
@@ -596,12 +596,12 @@
 				</p>
 			{/if}
 
-			<div class="min-h-0 flex-1 overflow-y-auto pr-1">
+			<div class="min-h-0 min-w-0 flex-1 overflow-y-auto p-0.5">
 				{#if selectedControl?.kind === 'sequences'}
 					<SequencePanel availableSequences={data.sequences} />
 				{:else if selectedControl?.kind === 'conditions'}
-					<div class="h-full min-h-[10rem] min-w-0 overflow-auto">
-						<div class="h-full w-fit min-w-full">
+					<div class="mobile-device min-h-[10rem] min-w-0">
+						<div class="w-full min-w-0">
 							{#if observingConditionsDevice}
 								<ObservingConditionsBlock
 									device={observingConditionsDevice}
@@ -678,8 +678,8 @@
 						</div>
 					</section>
 				{:else if selectedControl?.kind === 'livestreams'}
-					<div class="h-full min-h-[10rem] min-w-0 overflow-auto">
-						<div class="h-full w-full min-w-72">
+					<div class="mobile-device min-h-[10rem] min-w-0">
+						<div class="w-full min-w-0">
 							<LivestreamControls
 								initialLivestreams={data.livestreams}
 								onAvailabilityChange={(available) => {
@@ -689,8 +689,8 @@
 						</div>
 					</div>
 				{:else if selectedDevice}
-					<div class="h-full min-h-[10rem] min-w-0 overflow-auto">
-						<div class="h-full w-fit min-w-full">
+					<div class="mobile-device min-h-[10rem] min-w-0">
+						<div class="w-full min-w-0">
 							{#if selectedDevice.type === 'switch'}
 								{@const switchControls = switchControlsForDevice(selectedDevice)}
 
@@ -731,5 +731,104 @@
 		box-shadow:
 			4px 4px 0 #a855f7,
 			7px 7px 0 rgb(76 29 149 / 55%);
+	}
+	/* Phone-specific presentation; desktop device sizing stays unchanged. */
+	.mobile-device :global(article) {
+		width: 100%;
+		height: auto;
+		max-height: none;
+		min-width: 0;
+	}
+	.mobile-device :global(article > header) {
+		align-items: center;
+	}
+	.mobile-device :global(article > header h3) {
+		white-space: normal;
+	}
+	.mobile-device :global(article > div) {
+		width: 100%;
+		min-width: 0;
+		height: auto;
+		overflow: visible;
+	}
+	.mobile-device :global(article > div > div),
+	.mobile-device :global(article > div > dl) {
+		width: 100%;
+		min-width: 0;
+		height: auto;
+	}
+	.mobile-device :global(button),
+	.mobile-device :global(select),
+	.mobile-device :global(input:not([type='checkbox'])) {
+		min-height: 44px;
+	}
+	.mobile-device :global(input:not([type='checkbox'])),
+	.mobile-device :global(select) {
+		font-size: 16px;
+	}
+	.mobile-device :global(button) {
+		min-width: 44px;
+	}
+	.mobile-device :global(input[type='checkbox']) {
+		width: 24px;
+		height: 24px;
+	}
+	.mobile-device :global(label:has(input[type='checkbox'])) {
+		min-height: 44px;
+	}
+	.mobile-device :global(.telescope-state) {
+		flex: none;
+		grid-template-columns: 1fr 1fr 0.9fr;
+	}
+	.mobile-device :global(.telescope-state > div) {
+		display: grid;
+		justify-content: stretch;
+		gap: 6px;
+		padding: 6px 4px;
+	}
+	.mobile-device :global(.telescope-state > div > p:last-child) {
+		font-size: 11px;
+	}
+	.mobile-device :global(.telescope-controls),
+	.mobile-device :global(.camera-controls) {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 8px;
+	}
+	.mobile-device :global(.camera-state) {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+	.mobile-device :global(.switch-controls) {
+		grid-template-columns: minmax(0, 1fr);
+		overflow: visible;
+		flex: none;
+	}
+	.mobile-device :global(.focuser-controls) {
+		grid-template-rows: auto auto auto;
+	}
+	.mobile-device :global(.cover-controls) {
+		grid-template-rows: auto auto repeat(2, minmax(44px, auto));
+	}
+	.mobile-device :global(article > div > .grid) {
+		max-height: none;
+	}
+	.mobile-device :global(.livestream-controls) {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: auto;
+	}
+	.mobile-device :global(.livestream-settings) {
+		grid-column: 1;
+		grid-row: auto;
+		overflow: visible;
+		border-left: 0;
+		padding-left: 0;
+	}
+	.mobile-device :global(.livestream-controls > p) {
+		grid-column: 1;
+	}
+	@media (min-width: 640px) and (max-height: 500px) {
+		.mobile-panels {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			grid-template-rows: minmax(0, 1fr);
+		}
 	}
 </style>

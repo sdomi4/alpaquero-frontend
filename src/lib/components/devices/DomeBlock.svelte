@@ -68,10 +68,10 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid gap-1.5">
-		<div class="grid grid-cols-1 gap-1.5 font-mono">
+	<div class="grid h-full w-60 gap-1 pb-0.5">
+		<div class="grid min-h-0 grid-cols-2 grid-rows-[auto_minmax(2rem,1fr)_auto] gap-1 font-mono">
 			<div
-				class="border bg-neutral-900 p-1.5"
+				class="col-span-2 flex items-center justify-between border bg-neutral-900 px-2 py-1"
 				class:border-neutral-500={!hasError}
 				class:border-red-500={hasError}
 				class:bg-red-950={hasError}
@@ -99,7 +99,7 @@
 			</button>
 
 			<label
-				class="flex cursor-pointer items-center justify-between gap-1.5 border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-[0.65rem]"
+				class="col-span-2 flex cursor-pointer items-center justify-between gap-1.5 border border-neutral-700 bg-neutral-950 px-2 py-1 text-[0.65rem]"
 				title="Safety override"
 			>
 				<span class="text-neutral-400 uppercase">Safe</span>

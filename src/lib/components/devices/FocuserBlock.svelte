@@ -93,19 +93,21 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid gap-1.5 font-mono">
-		<div class="grid grid-cols-3 gap-1.5">
-			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+	<div
+		class="focuser-controls grid h-full w-96 grid-rows-[auto_minmax(2rem,1fr)_minmax(2rem,1fr)] gap-1 pb-0.5 font-mono"
+	>
+		<div class="grid grid-cols-3 gap-1">
+			<div class="border border-neutral-700 bg-neutral-900 px-2 py-0.5">
 				<span class="block text-[0.65rem] text-neutral-400 uppercase">Position</span>
 				<span class="text-sm font-black">{position ?? '--'}</span>
 			</div>
-			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+			<div class="border border-neutral-700 bg-neutral-900 px-2 py-0.5">
 				<span class="block text-[0.65rem] text-neutral-400 uppercase">Temperature</span>
 				<span class="text-sm font-black"
 					>{temperature === null ? '--' : `${temperature.toFixed(1)} °C`}</span
 				>
 			</div>
-			<div class="border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+			<div class="border border-neutral-700 bg-neutral-900 px-2 py-0.5">
 				<span class="block text-[0.65rem] text-neutral-400 uppercase">Motion</span>
 				<span class="text-sm font-black" class:text-purple-200={isMoving}
 					>{isMoving ? 'moving' : 'idle'}</span
@@ -113,9 +115,11 @@
 			</div>
 		</div>
 
-		<div class="grid grid-cols-[minmax(6rem,1fr)_auto] gap-1.5">
-			<label class="border border-neutral-700 bg-neutral-900 px-2 py-1">
-				<span class="text-[0.65rem] text-neutral-400 uppercase">Absolute position</span>
+		<div class="grid grid-cols-[minmax(6rem,1fr)_auto] gap-1">
+			<label
+				class="flex min-w-0 items-center gap-2 border border-neutral-700 bg-neutral-900 px-2 py-1"
+			>
+				<span class="shrink-0 text-[0.65rem] text-neutral-400 uppercase">Position</span>
 				<input
 					type="number"
 					min="0"
@@ -123,7 +127,7 @@
 					step="1"
 					bind:value={targetPosition}
 					disabled={controlsDisabled}
-					class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c]"
+					class="w-full min-w-0 border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c]"
 				/>
 			</label>
 			<button
@@ -135,7 +139,7 @@
 			>
 		</div>
 
-		<div class="grid grid-cols-[auto_minmax(5rem,1fr)_auto_auto] gap-1.5">
+		<div class="grid grid-cols-[auto_minmax(5rem,1fr)_auto_auto] gap-1">
 			<button
 				type="button"
 				aria-label="Nudge focus inward"
@@ -144,7 +148,9 @@
 				class="border border-[#80499c] bg-neutral-800 px-3 text-lg font-black shadow-[2px_2px_0_#80499c] disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>−</button
 			>
-			<label class="border border-neutral-700 bg-neutral-900 px-2 py-1">
+			<label
+				class="flex min-w-0 items-center gap-2 border border-neutral-700 bg-neutral-900 px-2 py-1"
+			>
 				<span class="text-[0.65rem] text-neutral-400 uppercase">Nudge</span>
 				<input
 					type="number"
@@ -153,7 +159,7 @@
 					step={stepSize}
 					bind:value={nudgeAmount}
 					disabled={controlsDisabled}
-					class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c]"
+					class="w-full min-w-0 border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c]"
 				/>
 			</label>
 			<button

@@ -46,11 +46,10 @@
 
 <article
 	class="flex h-full max-h-full w-fit flex-col justify-self-start border border-neutral-700 bg-neutral-950 p-1.5 shadow-[2px_2px_0_#80499c]"
-	class:opacity-60={!device.connected}
 >
-	<header class="mb-1.5 flex items-center justify-between gap-2">
+	<header class="mb-1 flex shrink-0 items-center justify-between gap-2">
 		<div class="flex min-w-0 items-center gap-1.5">
-			<h3 class="truncate text-xs leading-tight font-black uppercase">
+			<h3 title={device.name} class="truncate text-xs leading-tight font-black uppercase">
 				{device.name}
 			</h3>
 
@@ -67,7 +66,7 @@
 			type="button"
 			onclick={toggleConnection}
 			disabled={pending}
-			class="w-20 shrink-0 border px-1.5 py-0.5 text-center font-mono text-[0.6rem] leading-none font-black uppercase"
+			class="h-6 w-20 shrink-0 border px-1.5 py-0.5 text-center font-mono text-[0.6rem] leading-none font-black uppercase"
 			class:border-[#80499c]={device.connected}
 			class:bg-[#80499c]={device.connected}
 			class:text-neutral-50={device.connected}
@@ -96,3 +95,12 @@
 		{@render children?.()}
 	</div>
 </article>
+
+<style>
+	article :global(button:focus-visible),
+	article :global(input:focus-visible),
+	article :global(select:focus-visible) {
+		outline: 2px solid #80499c;
+		outline-offset: 1px;
+	}
+</style>

@@ -455,32 +455,23 @@
 		}.component;
 	}
 
-	function deviceControlFrameClass(device: MergedDevice) {
-		const base = 'h-40 shrink-0 w-fit';
-
-		if (device.type === 'livestream') return `${base} min-w-[28rem] max-w-[36rem]`;
-		if (device.type === 'camera') return `${base} min-w-40 max-w-[24rem]`;
-		if (device.type === 'cover') return `${base} min-w-40 max-w-[42rem]`;
-		if (device.type === 'telescope') return 'h-full shrink-0 w-fit min-w-40 max-w-[52rem]';
-		if (device.type === 'filterwheel') return `${base} min-w-40 max-w-[36rem]`;
-		if (device.type === 'focuser') return `${base} min-w-[28rem] max-w-[36rem]`;
-		if (device.type === 'dome') return `${base} min-w-40`;
-		if (device.type === 'switch') return `${base} min-w-40 max-w-[64rem]`;
-
-		return `${base} min-w-40 max-w-[30rem]`;
+	function deviceControlFrameClass() {
+		return 'h-full min-h-0 shrink-0 w-fit';
 	}
 
 	function estimatedDeviceControlWidth(device: MergedDevice) {
-		if (device.type === 'livestream') return 500;
-		if (device.type === 'dome') return 170;
-		if (device.type === 'camera') return 320;
-		if (device.type === 'cover') return 300;
-		if (device.type === 'filterwheel') return 260;
-		if (device.type === 'focuser') return 460;
-		if (device.type === 'switch') return 420;
-		if (device.type === 'telescope') return 720;
-
-		return 240;
+		// Content widths plus the shared shell's padding and border.
+		const widths: Record<string, number> = {
+			livestream: 576,
+			dome: 254,
+			camera: 526,
+			cover: 366,
+			filterwheel: 334,
+			focuser: 398,
+			switch: 462,
+			telescope: 430
+		};
+		return widths[device.type] ?? 302;
 	}
 
 	function createWidthBasedControlTabs(
@@ -680,7 +671,7 @@
 <ErrorToast message={latestErrorMessage} onDismiss={dismissErrorToast} />
 
 <main
-	class="grid h-screen grid-rows-[auto_minmax(0,1fr)_minmax(14.5rem,0.64fr)] gap-2 overflow-hidden bg-neutral-950 p-2 text-neutral-100"
+	class="grid h-screen grid-rows-[auto_minmax(0,1fr)_minmax(17rem,0.64fr)] gap-2 overflow-hidden bg-neutral-950 p-2 text-neutral-100"
 >
 	<header
 		class="grid gap-3 border-2 border-neutral-700 bg-neutral-900 p-2 text-neutral-100 shadow-[4px_4px_0_#80499c] lg:grid-cols-[1.1fr_0.8fr_minmax(20rem,1.5fr)_auto_auto] lg:items-center"
@@ -796,14 +787,14 @@
 				<h2 class="shrink-0 text-lg leading-none font-black uppercase">Device Controls</h2>
 
 				{#if showControlTabs}
-					<nav class="flex flex-wrap gap-1" aria-label="Device control tabs">
+					<nav class="flex max-w-full gap-1 overflow-x-auto pb-1" aria-label="Device control tabs">
 						{#each controlTabs as tab (tab.id)}
 							<button
 								type="button"
 								onclick={() => {
 									activeControlTab = tab.id;
 								}}
-								class="border px-2 py-1 font-mono text-[0.65rem] leading-none font-black uppercase"
+								class="shrink-0 border px-2 py-1 font-mono text-[0.65rem] leading-none font-black whitespace-nowrap uppercase"
 								class:border-[#80499c]={tab.id === activeControlTabModel?.id}
 								class:bg-[#80499c]={tab.id === activeControlTabModel?.id}
 								class:text-neutral-50={tab.id === activeControlTabModel?.id}
@@ -865,7 +856,7 @@
 					<div class="h-full min-h-0 overflow-x-auto overflow-y-hidden pr-1 pb-1">
 						<div class="flex h-full min-w-max items-stretch gap-2 pr-2">
 							{#each activeControlDevices as device (device.id)}
-								<div class={deviceControlFrameClass(device) + ' h-full min-h-0 w-fit flex-none'}>
+								<div class={deviceControlFrameClass() + ' h-full min-h-0 w-fit flex-none'}>
 									{#if device.type === 'livestream'}
 										<LivestreamControls
 											initialLivestreams={data.livestreams}

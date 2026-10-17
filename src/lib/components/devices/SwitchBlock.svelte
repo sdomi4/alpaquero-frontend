@@ -134,7 +134,7 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid gap-1.5">
+	<div class="flex h-full w-[28rem] flex-col gap-1 pb-0.5">
 		{#if !device.connected}
 			<div class="border border-dashed border-neutral-700 p-1.5 font-mono text-xs text-neutral-500">
 				Connect switch device to load controls.
@@ -152,7 +152,9 @@
 				No switch controls reported.
 			</div>
 		{:else}
-			<div class="grid max-h-full grid-cols-[repeat(3,max-content)] gap-1.5 overflow-y-auto pr-1">
+			<div
+				class="switch-controls grid min-h-0 flex-1 auto-rows-max grid-cols-2 content-start gap-1.5 overflow-y-auto p-0.5"
+			>
 				{#each controls as control (control.id)}
 					{@const value = valueFor(control)}
 					{@const active = value > 0}
@@ -160,9 +162,10 @@
 					{#if control.control_type === 'toggle'}
 						<button
 							type="button"
+							aria-pressed={active}
 							disabled={isPending(control) || !control.writeable}
 							onclick={() => setControl(control, active ? 0 : 1)}
-							class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border px-2 py-1.5 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+							class="grid min-h-9 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border px-2 py-1.5 text-left font-mono text-xs font-black uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 							class:border-[#80499c]={active}
 							class:bg-[#80499c]={active}
 							class:text-neutral-50={active}
@@ -170,19 +173,22 @@
 							class:bg-neutral-800={!active}
 							class:text-neutral-100={!active}
 						>
-							<span class="truncate">{control.label}</span>
+							<span title={control.label} class="truncate">{control.label}</span>
 							<span class="border border-current px-1.5 py-0.5 text-[0.6rem] leading-none">
 								{isPending(control) ? '...' : active ? 'on' : 'off'}
 							</span>
 						</button>
 					{:else}
 						<div
-							class="grid min-w-0 content-center gap-1.5 border border-neutral-700 bg-neutral-950 p-1.5 font-mono shadow-[2px_2px_0_#80499c]"
+							class="grid min-h-[4.5rem] min-w-0 content-center gap-1.5 border border-neutral-700 bg-neutral-950 p-1.5 font-mono shadow-[2px_2px_0_#80499c]"
 						>
 							<div class="grid grid-cols-[minmax(0,1fr)_4rem_auto] items-center gap-1.5">
-								<p class="truncate text-xs font-black uppercase">{control.label}</p>
+								<p title={control.label} class="truncate text-xs font-black uppercase">
+									{control.label}
+								</p>
 
 								<input
+									aria-label={control.label}
 									type="number"
 									min={control.min_value ?? 0}
 									max={control.max_value ?? 1}
@@ -204,6 +210,7 @@
 							</div>
 
 							<input
+								aria-label={control.label}
 								type="range"
 								min={control.min_value ?? 0}
 								max={control.max_value ?? 1}
@@ -211,7 +218,7 @@
 								{value}
 								disabled={isPending(control) || !control.writeable}
 								onchange={(event) => setControl(control, Number(event.currentTarget.value))}
-								class="h-4 w-full accent-[#80499c] disabled:opacity-40"
+								class="block h-5 w-full accent-[#80499c] disabled:opacity-40"
 							/>
 						</div>
 					{/if}

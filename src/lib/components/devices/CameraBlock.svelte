@@ -163,50 +163,50 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid gap-2">
-		<div class="grid grid-cols-2 gap-1.5 font-mono xl:grid-cols-5">
-			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+	<div class="flex h-full w-[32rem] flex-col gap-1 pb-0.5">
+		<div class="camera-state grid grid-cols-5 gap-1 font-mono">
+			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-1.5 py-0.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Temp</p>
-				<p class="truncate text-sm leading-none font-black">
+				<p class="truncate text-xs leading-none font-black">
 					{formatNumber(displayState.temperature)} C
 				</p>
 			</div>
 
-			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-1.5 py-0.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Target</p>
-				<p class="truncate text-sm leading-none font-black">
+				<p class="truncate text-xs leading-none font-black">
 					{formatNumber(displayState.targetTemperature)} C
 				</p>
 			</div>
 
-			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-1.5 py-0.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Cooler</p>
-				<p class="truncate text-sm leading-none font-black">
+				<p class="truncate text-xs leading-none font-black">
 					{formatPercent(displayState.coolerPower)}
 				</p>
 			</div>
 
 			<div
-				class="min-w-0 border bg-neutral-900 px-2 py-1.5"
+				class="min-w-0 border bg-neutral-900 px-1.5 py-0.5"
 				class:border-yellow-300={displayState.exposing === true}
 				class:border-neutral-700={displayState.exposing !== true}
 			>
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Exposure</p>
-				<p class="truncate text-sm leading-none font-black uppercase">
+				<p class="truncate text-xs leading-none font-black uppercase">
 					{formatBoolean(displayState.exposing, 'active', 'idle')}
 				</p>
 			</div>
 
-			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
+			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-1.5 py-0.5">
 				<p class="text-[0.6rem] text-neutral-400 uppercase">Done</p>
-				<p class="truncate text-sm leading-none font-black">
+				<p class="truncate text-xs leading-none font-black">
 					{formatPercent(progressPercent)}
 				</p>
 			</div>
 		</div>
 
-		<div class="grid gap-2 font-mono">
-			<div class="grid gap-2 border border-neutral-700 bg-neutral-900 p-2">
+		<div class="camera-controls grid min-h-0 flex-1 grid-cols-[1.5fr_1fr] gap-1 font-mono">
+			<div class="grid min-h-0 grid-rows-[auto_minmax(1.75rem,1fr)] gap-1">
 				<div class="grid grid-cols-4 gap-1.5">
 					<label class="min-w-0">
 						<span class="text-[0.6rem] text-neutral-400 uppercase">Exposure s</span>
@@ -216,7 +216,7 @@
 							step="0.1"
 							bind:value={exposure}
 							disabled={!device.connected || pending !== null}
-							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+							class="block w-full min-w-0 border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 						/>
 					</label>
 
@@ -228,7 +228,7 @@
 							step="1"
 							bind:value={binX}
 							disabled={!device.connected || pending !== null}
-							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+							class="block w-full min-w-0 border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 						/>
 					</label>
 
@@ -240,7 +240,7 @@
 							step="1"
 							bind:value={binY}
 							disabled={!device.connected || pending !== null}
-							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+							class="block w-full min-w-0 border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 						/>
 					</label>
 
@@ -252,7 +252,7 @@
 							placeholder="none"
 							bind:value={fileSuffix}
 							disabled={!device.connected || pending !== null}
-							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+							class="block w-full min-w-0 border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 						/>
 
 						<datalist id={`suffix-presets-${device.id}`}>
@@ -268,24 +268,25 @@
 					type="button"
 					disabled={!canCommand}
 					onclick={() => run('capture')}
-					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+					class="border border-[#80499c] bg-neutral-800 px-3 py-1 text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'capture' ? 'capturing' : 'capture'}
 				</button>
 			</div>
 
-			<div class="grid grid-cols-2 gap-2 font-mono">
+			<div class="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-1 font-mono">
 				<div
-					class="grid grid-cols-[1fr_auto] items-end gap-2 border border-neutral-700 bg-neutral-900 p-2"
+					class="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-1 border border-neutral-700 bg-neutral-900 p-1"
 				>
-					<label class="min-w-0">
-						<span class="text-[0.6rem] text-neutral-400 uppercase">Set temp C</span>
+					<label class="flex min-w-0 items-center gap-1">
+						<span class="shrink-0 text-[0.6rem] text-purple-200 uppercase">Temp C</span>
 						<input
 							type="number"
 							step="0.5"
+							aria-label="Target temperature in Celsius"
 							bind:value={targetTemperature}
 							disabled={!device.connected || pending !== null}
-							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+							class="block w-full min-w-0 border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 						/>
 					</label>
 
@@ -293,19 +294,19 @@
 						type="button"
 						disabled={!canCommand}
 						onclick={() => run('temperature')}
-						class="border border-[#80499c] bg-neutral-800 px-3 py-1.5 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+						class="border border-[#80499c] bg-neutral-800 px-3 py-0.5 text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 					>
 						{pending === 'temperature' ? 'setting' : 'set'}
 					</button>
 				</div>
 
-				<div class="grid content-center gap-1 border border-neutral-700 bg-neutral-900 p-2">
+				<div class="grid content-center gap-0.5 border border-neutral-700 bg-neutral-900 p-1">
 					<div class="flex items-center justify-between gap-2 font-mono">
 						<span class="text-[0.6rem] text-neutral-400 uppercase">Progress</span>
 						<span class="text-xs font-black">{formatPercent(progressPercent)}</span>
 					</div>
 
-					<div class="h-3 border border-neutral-700 bg-neutral-950">
+					<div class="h-1.5 border border-neutral-700 bg-neutral-950">
 						<div class="h-full bg-[#80499c]" style:width={`${progressPercent}%`}></div>
 					</div>
 
@@ -320,7 +321,7 @@
 		</div>
 
 		{#if error}
-			<p class="truncate border border-red-500 bg-red-950 p-1 font-mono text-xs text-red-100">
+			<p class="border border-red-500 bg-red-950 p-1 font-mono text-xs break-words text-red-100">
 				{error}
 			</p>
 		{/if}

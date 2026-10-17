@@ -233,9 +233,9 @@
 
 {#if livestreams !== null}
 	<article
-		class="flex h-full max-h-full w-full min-w-72 flex-col justify-self-start border border-neutral-700 bg-neutral-950 p-1.5 shadow-[2px_2px_0_#80499c]"
+		class="flex h-full max-h-full w-[36rem] flex-col justify-self-start border border-neutral-700 bg-neutral-950 p-1.5 shadow-[2px_2px_0_#80499c]"
 	>
-		<header class="mb-1.5 flex items-center justify-between gap-2">
+		<header class="mb-1 flex shrink-0 items-center justify-between gap-2">
 			<div class="flex min-w-0 items-center gap-1.5">
 				<h3 class="truncate text-xs leading-tight font-black uppercase">Livestreams</h3>
 				{#if connected && livestreams.length > 0}
@@ -258,7 +258,7 @@
 				onclick={toggleConnection}
 				disabled={loading || pendingAction !== null || pendingCameraControl !== null}
 				aria-pressed={connected}
-				class="w-20 shrink-0 border px-1.5 py-0.5 text-center font-mono text-[0.6rem] leading-none font-black uppercase"
+				class="h-6 w-20 shrink-0 border px-1.5 py-0.5 text-center font-mono text-[0.6rem] leading-none font-black uppercase"
 				class:border-[#80499c]={connected}
 				class:bg-[#80499c]={connected}
 				class:text-neutral-50={connected}
@@ -272,16 +272,20 @@
 		</header>
 
 		<div
-			class="grid min-h-0 flex-1 content-start gap-1.5 overflow-y-auto pr-1 font-mono text-[0.65rem] uppercase"
+			class="livestream-controls grid min-h-0 flex-1 grid-cols-[10rem_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-1 overflow-y-auto p-0.5 font-mono text-[0.65rem] uppercase"
 		>
 			{#if !connected}
-				<p class="border border-dashed border-neutral-700 bg-neutral-900 p-2 text-neutral-500">
+				<p
+					class="col-span-2 border border-dashed border-neutral-700 bg-neutral-900 p-2 text-neutral-500"
+				>
 					Connect to enable livestream requests.
 				</p>
 			{:else if loading}
 				<p class="border border-neutral-700 bg-neutral-900 p-2 text-neutral-500">Loading...</p>
 			{:else if livestreams.length === 0}
-				<p class="border border-dashed border-neutral-700 bg-neutral-900 p-2 text-neutral-500">
+				<p
+					class="col-span-2 border border-dashed border-neutral-700 bg-neutral-900 p-2 text-neutral-500"
+				>
 					{error ? 'Unavailable' : 'None configured'}
 				</p>
 				{#if error}
@@ -294,7 +298,7 @@
 					</button>
 				{/if}
 			{:else}
-				<label class="grid gap-0.5">
+				<label class="col-start-1 grid gap-0.5">
 					<span class="text-neutral-400">Preview stream</span>
 					<select
 						bind:value={selectedName}
@@ -307,7 +311,7 @@
 					</select>
 				</label>
 
-				<div class="grid grid-cols-2 gap-1.5">
+				<div class="col-start-1 row-start-2 grid grid-cols-2 gap-1">
 					<button
 						type="button"
 						disabled={pendingAction !== null || selectedStatus === 'running'}
@@ -327,7 +331,9 @@
 					</button>
 				</div>
 
-				<div class="grid gap-1.5 border-t border-neutral-700 pt-1.5">
+				<div
+					class="livestream-settings col-start-2 row-span-2 row-start-1 grid min-h-0 content-start gap-1 overflow-y-auto border-l border-neutral-700 pl-1"
+				>
 					<div class="flex items-center justify-between gap-2">
 						<span class="font-black text-neutral-300">Camera settings</span>
 						{#if cameraSettingsLoading}
@@ -335,7 +341,7 @@
 						{/if}
 					</div>
 
-					<label class="grid grid-cols-[4.5rem_minmax(6rem,1fr)_5.5rem_auto] items-center gap-1.5">
+					<label class="grid grid-cols-[4.5rem_minmax(2rem,1fr)_4rem_auto] items-center gap-1.5">
 						<span class="text-neutral-400">Exposure us</span>
 						<input
 							type="range"
@@ -364,7 +370,7 @@
 						</button>
 					</label>
 
-					<label class="grid grid-cols-[4.5rem_minmax(6rem,1fr)_5.5rem_auto] items-center gap-1.5">
+					<label class="grid grid-cols-[4.5rem_minmax(2rem,1fr)_4rem_auto] items-center gap-1.5">
 						<span class="text-neutral-400">Gain</span>
 						<input
 							type="range"
@@ -393,7 +399,7 @@
 						</button>
 					</label>
 
-					<div class="grid grid-cols-[4.5rem_minmax(6rem,1fr)_auto] items-center gap-1.5">
+					<div class="grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-1.5">
 						<span class="text-neutral-400">Cooler</span>
 						<label
 							class="flex cursor-pointer items-center justify-between gap-2 border border-neutral-600 bg-neutral-900 px-2 py-1"
@@ -416,7 +422,7 @@
 						</button>
 					</div>
 
-					<label class="grid grid-cols-[4.5rem_minmax(6rem,1fr)_auto] items-center gap-1.5">
+					<label class="grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-1.5">
 						<span class="text-neutral-400">Target C</span>
 						<input
 							type="number"
@@ -435,7 +441,7 @@
 						</button>
 					</label>
 
-					<label class="grid grid-cols-[4.5rem_minmax(6rem,1fr)_auto] items-center gap-1.5">
+					<label class="grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-1.5">
 						<span class="text-neutral-400">Flip</span>
 						<select
 							bind:value={flip}

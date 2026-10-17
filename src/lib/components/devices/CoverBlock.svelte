@@ -122,36 +122,37 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid h-full w-fit content-start gap-1.5">
-		<div class="grid w-fit grid-cols-[max-content_max-content] gap-1.5 font-mono">
+	<div class="flex h-full w-[22rem] flex-col gap-1 pb-0.5">
+		<div class="cover-controls grid min-h-0 flex-1 grid-cols-4 gap-1 font-mono">
 			<div
-				class="min-w-30 border bg-neutral-900 p-1.5"
+				class="min-w-0 border bg-neutral-900 p-1"
 				class:border-neutral-500={!coverError}
 				class:border-red-500={coverError}
 				class:bg-red-950={coverError}
 			>
 				<p class="text-[0.65rem] text-neutral-400 uppercase">Cover</p>
-				<p class="truncate text-base leading-none font-black uppercase">{coverLabel}</p>
+				<p class="truncate text-xs leading-none font-black uppercase">{coverLabel}</p>
 			</div>
 
 			<div
-				class="min-w-30 border bg-neutral-900 p-1.5"
+				class="min-w-0 border bg-neutral-900 p-1"
 				class:border-neutral-500={!calibratorError}
 				class:border-red-500={calibratorError}
 				class:bg-red-950={calibratorError}
 			>
 				<p class="text-[0.65rem] text-neutral-400 uppercase">Cal</p>
-				<p class="truncate text-base leading-none font-black uppercase">{calibratorLabel}</p>
+				<p class="truncate text-xs leading-none font-black uppercase">{calibratorLabel}</p>
 			</div>
 
-			<div class="grid min-w-30 gap-1.5 border border-neutral-700 bg-neutral-900 p-1.5">
+			<div class="grid min-w-0 gap-1 border border-neutral-700 bg-neutral-900 p-1">
 				<div class="min-w-0">
 					<p class="text-[0.65rem] text-neutral-400 uppercase">Brightness</p>
-					<p class="truncate text-base leading-none font-black">
+					<p class="truncate text-xs leading-none font-black">
 						{Number.isNaN(brightness) ? '--' : brightness}
 					</p>
 
 					<input
+						aria-label="Target calibrator brightness"
 						id={`brightness-slider-${device.id}`}
 						type="range"
 						min="0"
@@ -159,7 +160,7 @@
 						step="1"
 						bind:value={targetBrightness}
 						disabled={!device.connected || calibratorPending !== null}
-						class="h-4 w-30 accent-[#80499c] disabled:opacity-40"
+						class="h-5 w-full accent-[#80499c] disabled:opacity-40"
 					/>
 				</div>
 
@@ -185,7 +186,7 @@
 			</div>
 
 			<label
-				class="flex min-w-30 cursor-pointer items-center justify-between gap-1.5 border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-[0.65rem]"
+				class="flex min-w-0 cursor-pointer items-center justify-between gap-1 border border-neutral-700 bg-neutral-950 px-2 py-0.5 text-[0.65rem]"
 				title="Safety override"
 			>
 				<span class="text-neutral-400 uppercase">Safe</span>
@@ -196,7 +197,7 @@
 				type="button"
 				disabled={!device.connected || calibratorPending !== null}
 				onclick={() => setCalibrator('on')}
-				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+				class="min-w-0 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{#if calibratorPending === 'on'}
 					setting
@@ -211,7 +212,7 @@
 				type="button"
 				disabled={!device.connected || calibratorPending !== null || calibratorOff}
 				onclick={() => setCalibrator('off')}
-				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+				class="min-w-0 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{calibratorPending === 'off' ? 'stopping' : 'cal off'}
 			</button>
@@ -220,7 +221,7 @@
 				type="button"
 				disabled={!device.connected || coverPending !== null || coverMoving || coverOpen}
 				onclick={() => runCover('open')}
-				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+				class="min-w-0 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{coverPending === 'open' || coverMoving ? 'opening' : 'open'}
 			</button>
@@ -229,7 +230,7 @@
 				type="button"
 				disabled={!device.connected || coverPending !== null || coverMoving || coverClosed}
 				onclick={() => runCover('close')}
-				class="min-w-30 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+				class="min-w-0 border border-[#80499c] bg-neutral-800 px-2 py-1 text-center font-mono text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 			>
 				{coverPending === 'close' || coverMoving ? 'closing' : 'close'}
 			</button>
@@ -241,3 +242,24 @@
 		{/if}
 	</div>
 </DeviceShell>
+
+<style>
+	.cover-controls {
+		grid-template-rows: auto auto repeat(2, minmax(1.5rem, 1fr));
+	}
+	.cover-controls > div:nth-child(-n + 2) {
+		grid-column: span 2;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+	.cover-controls > div:nth-child(3) {
+		grid-column: 1 / 3;
+		grid-row: 2 / 5;
+		align-content: center;
+	}
+	.cover-controls > label {
+		grid-column: 3 / 5;
+	}
+</style>

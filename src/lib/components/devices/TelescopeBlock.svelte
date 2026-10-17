@@ -113,121 +113,139 @@
 </script>
 
 <DeviceShell {device} {onLifecycleComplete} showStatus={false}>
-	<div class="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-2">
-		<div class="grid grid-cols-6 gap-1.5 font-mono">
-			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
-				<p class="text-[0.6rem] text-neutral-400 uppercase">RA</p>
-				<p class="truncate text-sm leading-none font-black">
+	<div class="flex h-full w-[26rem] flex-col gap-1 pb-0.5">
+		<div
+			class="telescope-state grid min-h-10 flex-[0.65] grid-cols-[1fr_1.3fr_0.95fr] grid-rows-2 gap-1 font-mono"
+		>
+			<div
+				class="flex min-w-0 items-center justify-between gap-1 border border-emerald-400/50 bg-emerald-400/5 px-1.5 py-0.5"
+			>
+				<p class="shrink-0 text-[0.6rem] leading-none text-emerald-300 uppercase">RA</p>
+				<p class="truncate text-xs leading-none font-black">
 					{displayState.positionRa ?? '--'}
 				</p>
 			</div>
 
-			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
-				<p class="text-[0.6rem] text-neutral-400 uppercase">Dec</p>
-				<p class="truncate text-sm leading-none font-black">
-					{displayState.positionDec ?? '--'}
-				</p>
-			</div>
-
-			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
-				<p class="text-[0.6rem] text-neutral-400 uppercase">Target RA</p>
-				<p class="truncate text-sm leading-none font-black">
+			<div
+				class="flex min-w-0 items-center justify-between gap-1 border border-[#80499c] bg-[#80499c]/10 px-1.5 py-0.5"
+			>
+				<p class="shrink-0 text-[0.6rem] leading-none text-purple-200 uppercase">Target RA</p>
+				<p class="truncate text-xs leading-none font-black">
 					{displayState.targetRa ?? '--'}
 				</p>
 			</div>
 
-			<div class="min-w-0 border border-neutral-700 bg-neutral-900 px-2 py-1.5">
-				<p class="text-[0.6rem] text-neutral-400 uppercase">Target Dec</p>
-				<p class="truncate text-sm leading-none font-black">
-					{displayState.targetDec ?? '--'}
-				</p>
-			</div>
-
 			<div
-				class="min-w-0 border bg-neutral-900 px-2 py-1.5"
-				class:border-emerald-400={displayState.parked === true}
-				class:border-neutral-700={displayState.parked !== true}
-			>
-				<p class="text-[0.6rem] text-neutral-400 uppercase">Park</p>
-				<p class="truncate text-sm leading-none font-black uppercase">
-					{formatBoolean(displayState.parked, 'parked', 'free')}
-				</p>
-			</div>
-
-			<div
-				class="min-w-0 border bg-neutral-900 px-2 py-1.5"
+				class="flex min-w-0 items-center justify-between gap-1 border bg-neutral-900 px-1.5 py-0.5"
 				class:border-yellow-300={displayState.slewing === true}
 				class:border-neutral-700={displayState.slewing !== true}
 			>
-				<p class="text-[0.6rem] text-neutral-400 uppercase">Motion</p>
-				<p class="truncate text-sm leading-none font-black uppercase">
+				<p class="shrink-0 text-[0.6rem] leading-none text-neutral-400 uppercase">Motion</p>
+				<p class="truncate text-xs leading-none font-black uppercase">
 					{displayState.slewing === true
 						? 'slewing'
 						: formatBoolean(displayState.tracking, 'tracking', 'idle')}
 				</p>
 			</div>
+
+			<div
+				class="flex min-w-0 items-center justify-between gap-1 border border-emerald-400/50 bg-emerald-400/5 px-1.5 py-0.5"
+			>
+				<p class="shrink-0 text-[0.6rem] leading-none text-emerald-300 uppercase">Dec</p>
+				<p class="truncate text-xs leading-none font-black">
+					{displayState.positionDec ?? '--'}
+				</p>
+			</div>
+
+			<div
+				class="flex min-w-0 items-center justify-between gap-1 border border-[#80499c] bg-[#80499c]/10 px-1.5 py-0.5"
+			>
+				<p class="shrink-0 text-[0.6rem] leading-none text-purple-200 uppercase">Target Dec</p>
+				<p class="truncate text-xs leading-none font-black">
+					{displayState.targetDec ?? '--'}
+				</p>
+			</div>
+
+			<div
+				class="flex min-w-0 items-center justify-between gap-1 border bg-neutral-900 px-1.5 py-0.5"
+				class:border-emerald-400={displayState.parked === true}
+				class:border-neutral-700={displayState.parked !== true}
+			>
+				<p class="shrink-0 text-[0.6rem] leading-none text-neutral-400 uppercase">Park</p>
+				<p class="truncate text-xs leading-none font-black uppercase">
+					{formatBoolean(displayState.parked, 'parked', 'free')}
+				</p>
+			</div>
 		</div>
 
-		<div class="grid min-h-0 grid-cols-[minmax(12rem,0.8fr)_minmax(0,1fr)] gap-2 font-mono">
-			<div class="grid content-start gap-1.5 border border-neutral-700 bg-neutral-900 p-2">
-				<form onsubmit={lookupTarget} class="flex items-end gap-1.5">
-					<label class="min-w-0 flex-1">
-						<span class="text-[0.6rem] text-neutral-400 uppercase">Star name</span>
+		<div
+			class="telescope-controls grid min-h-[4.625rem] flex-1 grid-cols-[minmax(0,1fr)_auto] items-stretch gap-1 font-mono"
+		>
+			<div class="grid min-h-0 min-w-0 grid-rows-3 gap-1">
+				<form onsubmit={lookupTarget} class="flex min-h-0 items-stretch gap-1">
+					<label class="min-h-0 min-w-0 flex-1">
+						<span class="sr-only">Star name</span>
 						<input
 							type="text"
-							placeholder="e.g. Vega"
+							placeholder="Star name"
 							bind:value={targetName}
 							disabled={lookingUp || pending !== null}
-							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+							class="block h-full min-h-0 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 						/>
 					</label>
 					<button
 						type="submit"
 						disabled={!targetName.trim() || lookingUp || pending !== null}
-						class="border border-[#80499c] bg-neutral-800 px-2 py-1 text-sm font-black text-neutral-100 uppercase hover:bg-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-600"
+						class="border border-[#80499c] bg-neutral-800 px-2 py-0.5 text-xs font-black text-neutral-100 uppercase hover:bg-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-600"
 					>
 						{lookingUp ? 'looking up' : 'lookup'}
 					</button>
 				</form>
-				<label class="min-w-0">
-					<span class="text-[0.6rem] text-neutral-400 uppercase">Command RA</span>
-					<input
-						type="text"
-						placeholder="hh:mm:ss.ss"
-						bind:value={targetRa}
-						oninput={() => {
-							targetsInitialized = true;
-						}}
-						disabled={!canCommand}
-						class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
-					/>
-				</label>
+				<div class="grid min-h-0 grid-cols-2 gap-1">
+					<label class="min-h-0 min-w-0">
+						<span class="sr-only">Command RA</span>
+						<input
+							type="text"
+							placeholder="RA hh:mm:ss.ss"
+							bind:value={targetRa}
+							oninput={() => {
+								targetsInitialized = true;
+							}}
+							disabled={!canCommand}
+							class="block h-full min-h-0 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+						/>
+					</label>
 
-				<label class="min-w-0">
-					<span class="text-[0.6rem] text-neutral-400 uppercase">Command Dec</span>
-					<input
-						type="text"
-						placeholder="+dd:mm:ss.ss"
-						bind:value={targetDec}
-						oninput={() => {
-							targetsInitialized = true;
-						}}
-						disabled={!canCommand}
-						class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
-					/>
+					<label class="min-h-0 min-w-0">
+						<span class="sr-only">Command Dec</span>
+						<input
+							type="text"
+							placeholder="Dec +dd:mm:ss.ss"
+							bind:value={targetDec}
+							oninput={() => {
+								targetsInitialized = true;
+							}}
+							disabled={!canCommand}
+							class="block h-full min-h-0 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-0.5 text-xs font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+						/>
+					</label>
+				</div>
+				<label
+					class="flex cursor-pointer items-center justify-between gap-3 border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-[0.65rem]"
+					class:border-red-500={safetyOverride}
+					title="Bypass safety checks for telescope commands"
+				>
+					<span class="text-neutral-300 uppercase">Safe</span>
+					<input type="checkbox" bind:checked={safetyOverride} class="h-4 w-4 accent-red-600" />
 				</label>
-				<p class="text-[0.6rem] text-neutral-400">
-					RA: hours (use d for degrees). For a coordinate pair or J designation, paste into RA and
-					leave Dec empty.
-				</p>
 			</div>
 
-			<div class="grid min-h-0 grid-cols-2 gap-1.5">
+			<div class="grid min-h-0 grid-cols-2 grid-rows-2 gap-1">
 				<button
 					type="button"
 					disabled={!canCommand}
 					onclick={() => run('slew')}
-					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+					class="min-w-20 border border-[#80499c] bg-neutral-800 px-3 py-1 text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'slew' ? 'slewing' : 'slew'}
 				</button>
@@ -236,7 +254,7 @@
 					type="button"
 					disabled={!canCommand}
 					onclick={() => run('sun')}
-					class="border border-yellow-300 bg-yellow-950 px-3 py-2 text-sm font-black text-yellow-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-yellow-900 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+					class="min-w-20 border border-yellow-300 bg-yellow-950 px-3 py-1 text-xs font-black text-yellow-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-yellow-900 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'sun' ? 'slewing' : 'sun'}
 				</button>
@@ -245,7 +263,7 @@
 					type="button"
 					disabled={!canCommand || displayState.parked === true}
 					onclick={() => run('park')}
-					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+					class="min-w-20 border border-[#80499c] bg-neutral-800 px-3 py-1 text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'park' ? 'parking' : 'park'}
 				</button>
@@ -254,29 +272,19 @@
 					type="button"
 					disabled={!canCommand || displayState.parked === false}
 					onclick={() => run('unpark')}
-					class="border border-[#80499c] bg-neutral-800 px-3 py-2 text-sm font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
+					class="min-w-20 border border-[#80499c] bg-neutral-800 px-3 py-1 text-xs font-black text-neutral-100 uppercase shadow-[2px_2px_0_#80499c] hover:bg-neutral-700 disabled:cursor-not-allowed disabled:border-neutral-700 disabled:bg-neutral-900 disabled:text-neutral-600"
 				>
 					{pending === 'unpark' ? 'freeing' : 'unpark'}
 				</button>
 			</div>
 		</div>
 
-		<div class="flex items-center justify-between gap-2">
-			<label
-				class="flex cursor-pointer items-center gap-1.5 border border-neutral-700 bg-neutral-950 px-2 py-1 font-mono text-[0.65rem]"
-				title="Safety override"
+		{#if error}
+			<p
+				class="min-w-0 border border-red-500 bg-red-950 p-1 font-mono text-xs break-words text-red-100"
 			>
-				<span class="text-neutral-400 uppercase">Safe</span>
-				<input type="checkbox" bind:checked={safetyOverride} class="h-4 w-4 accent-red-600" />
-			</label>
-
-			{#if error}
-				<p
-					class="min-w-0 flex-1 truncate border border-red-500 bg-red-950 p-1 font-mono text-xs text-red-100"
-				>
-					{error}
-				</p>
-			{/if}
-		</div>
+				{error}
+			</p>
+		{/if}
 	</div>
 </DeviceShell>
