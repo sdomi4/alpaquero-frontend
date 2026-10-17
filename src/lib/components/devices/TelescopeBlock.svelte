@@ -1,6 +1,7 @@
 <script lang="ts">
 	import DeviceShell from './DeviceShell.svelte';
 	import {
+		lookupStar,
 		parkTelescope,
 		slewTelescope,
 		slewTelescopeToSun,
@@ -27,6 +28,8 @@
 	let { device, onLifecycleComplete }: Props = $props();
 
 	let targetRa = $state('');
+	let targetName = $state('');
+	let lookingUp = $state(false);
 	let targetDec = $state('');
 	let safetyOverride = $state(false);
 	let pending = $state<TelescopeAction | null>(null);
@@ -34,7 +37,24 @@
 	let targetsInitialized = $state(false);
 
 	const displayState = $derived(getTelescopeDisplayState(device.state));
-	const canCommand = $derived(device.connected && pending === null);
+	const canCommand = $derived(device.connected && pending === null && !lookingUp);
+
+	async function lookupTarget(event: SubmitEvent) {
+		event.preventDefault();
+		if (!targetName.trim() || lookingUp || pending !== null) return;
+		lookingUp = true;
+		error = null;
+		try {
+			const result = await lookupStar(targetName);
+			targetsInitialized = true;
+			targetRa = String(result.ra);
+			targetDec = String(result.dec);
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Star lookup failed';
+		} finally {
+			lookingUp = false;
+		}
+	}
 
 	function formatBoolean(value: boolean | null, trueLabel: string, falseLabel: string) {
 		if (value === null) return '--';
@@ -150,6 +170,25 @@
 
 		<div class="grid min-h-0 grid-cols-[minmax(12rem,0.8fr)_minmax(0,1fr)] gap-2 font-mono">
 			<div class="grid content-start gap-1.5 border border-neutral-700 bg-neutral-900 p-2">
+				<form onsubmit={lookupTarget} class="flex items-end gap-1.5">
+					<label class="min-w-0 flex-1">
+						<span class="text-[0.6rem] text-neutral-400 uppercase">Star name</span>
+						<input
+							type="text"
+							placeholder="e.g. Vega"
+							bind:value={targetName}
+							disabled={lookingUp || pending !== null}
+							class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
+						/>
+					</label>
+					<button
+						type="submit"
+						disabled={!targetName.trim() || lookingUp || pending !== null}
+						class="border border-[#80499c] bg-neutral-800 px-2 py-1 text-sm font-black text-neutral-100 uppercase hover:bg-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-600"
+					>
+						{lookingUp ? 'looking up' : 'lookup'}
+					</button>
+				</form>
 				<label class="min-w-0">
 					<span class="text-[0.6rem] text-neutral-400 uppercase">Command RA</span>
 					<input
@@ -159,7 +198,7 @@
 						oninput={() => {
 							targetsInitialized = true;
 						}}
-						disabled={!device.connected || pending !== null}
+						disabled={!canCommand}
 						class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 					/>
 				</label>
@@ -173,13 +212,13 @@
 						oninput={() => {
 							targetsInitialized = true;
 						}}
-						disabled={!device.connected || pending !== null}
+						disabled={!canCommand}
 						class="mt-0.5 w-full border border-neutral-600 bg-neutral-950 px-1.5 py-1 text-sm font-black text-neutral-100 outline-none focus:border-[#80499c] disabled:text-neutral-600"
 					/>
 				</label>
 				<p class="text-[0.6rem] text-neutral-400">
 					RA: hours (use d for degrees). For a coordinate pair or J designation, paste into RA and
-					leave Dec empty. Checked on Slew.
+					leave Dec empty.
 				</p>
 			</div>
 

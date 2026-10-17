@@ -189,6 +189,34 @@ async function runTelescopeCommand(
 	return res.json().catch(() => null);
 }
 
+export async function lookupStar(name: string): Promise<{ ra: number; dec: number }> {
+	const res = await postObservatoryPath(`astro/catalog/${encodeURIComponent(name.trim())}`);
+	const body = await res.json().catch(() => null);
+
+	if (!res.ok) {
+		throw new Error(
+			typeof body?.detail === 'string'
+				? body.detail
+				: `Star lookup failed: ${res.status} ${res.statusText}`
+		);
+	}
+
+	if (
+		typeof body?.ra !== 'number' ||
+		!Number.isFinite(body.ra) ||
+		typeof body?.dec !== 'number' ||
+		!Number.isFinite(body.dec) ||
+		body.ra < 0 ||
+		body.ra >= 24 ||
+		body.dec < -90 ||
+		body.dec > 90
+	) {
+		throw new Error('Star lookup returned invalid coordinates');
+	}
+
+	return { ra: body.ra, dec: body.dec };
+}
+
 export async function parkTelescope(telescopeId: string, safetyOverride = false) {
 	return runTelescopeCommand(telescopeId, 'park', safetyOverride);
 }
